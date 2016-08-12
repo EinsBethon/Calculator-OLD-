@@ -1,8 +1,9 @@
 package algebraic;
 
+import java.io.File;
 import java.util.ArrayList;
 
-import equation.Equation;
+import equation.EqCalc;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
@@ -16,9 +17,8 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import main.Display;
-import main.Writer;
 import standard.Standard;
+import utils.Utils;
 
 public class Algebraic {
 
@@ -30,6 +30,7 @@ public class Algebraic {
     private StringBuilder one, two;
     private boolean displayAnswer;
     private boolean nav;
+    private File file;
 
     public Algebraic() {
         init();
@@ -37,7 +38,7 @@ public class Algebraic {
 
     private String solve(String input) {
         StringBuilder data = new StringBuilder(input);
-        Writer.write("In: " + data.toString());
+        Utils.writeToFile(file, "In: " + data.toString(), true);
         if (data.toString().contains("\u03C0") || data.toString().contains("T") || data.toString().contains("e^"))
             data.replace(0, data.length(), replaceVars(data.toString()));
 
@@ -50,10 +51,10 @@ public class Algebraic {
                     if (parentheses.get(i).startsWith("(")) o++;
                     else if (parentheses.get(i).startsWith(")")) c++;
                     if (i == parentheses.size() - 1 && o != c) { // If opening and parentheses are not equally frequent, "throw" an error and return
-                        Display.show("Error!", "You are either missing an opening\nor closing parenthesis.");
+                        Utils.popUp("Error!", "You are either missing an opening\nor closing parenthesis.");
                         return "Error!";
                     } else if (c > o) { // If a closing parenthesis is used before an opening parenthesis, "throw" an error and return
-                        Display.show("Error!", "You cannot use a closing parenthesis\nwithout an opening parenthesis first.");
+                        Utils.popUp("Error!", "You cannot use a closing parenthesis\nwithout an opening parenthesis first.");
                         return "Error!";
                     }
                 }
@@ -81,35 +82,35 @@ public class Algebraic {
         }
 
         if (data.indexOf("^") != -1) {
-            Writer.write("Exponent in: " + data.toString());
+            Utils.writeToFile(file, "Exponent in: " + data.toString(), true);
             double[] nums = getNums(data.toString(), '^');
             data.replace((int) nums[2], (int) nums[3], "" + Math.pow(nums[0], nums[1]));
-            Writer.write("Exponent out: " + data.toString());
+            Utils.writeToFile(file, "Exponent out: " + data.toString(), true);
         }
 
         if ((data.indexOf("*") != -1 && data.indexOf("/") != -1 && data.indexOf("*") < data.indexOf("/")) || (data.indexOf("*") != -1 && data.indexOf("/") == -1)) {
-            Writer.write("Multiplication in: " + data.toString());
+            Utils.writeToFile(file, "Multiplication in: " + data.toString(), true);
             double[] nums = getNums(data.toString(), '*');
             data.replace((int) nums[2], (int) nums[3], "" + (nums[0] * nums[1]));
-            Writer.write("Multiplication out: " + data.toString());
+            Utils.writeToFile(file, "Multiplication out: " + data.toString(), true);
         } else if ((data.indexOf("/") != -1 && data.indexOf("*") != -1 && data.indexOf("/") < data.indexOf("*")) || (data.indexOf("/") != -1 && data.indexOf("*") == -1)) {
-            Writer.write("Division in: " + data.toString());
+            Utils.writeToFile(file, "Division in: " + data.toString(), true);
             double[] nums = getNums(data.toString(), '/');
             data.replace((int) nums[2], (int) nums[3], "" + (nums[0] / nums[1]));
-            Writer.write("Division out: " + data.toString());
+            Utils.writeToFile(file, "Division out: " + data.toString(), true);
         }
 
         if ((data.indexOf("+") != -1 && data.indexOf("-") != -1 && data.indexOf("+") < data.indexOf("-")) || (data.indexOf("+") != -1 && data.indexOf("-") == -1)) {
-            Writer.write("Addition in: " + data.toString());
+            Utils.writeToFile(file, "Addition in: " + data.toString(), true);
             double[] nums = getNums(data.toString(), '+');
             data.replace((int) nums[2], (int) nums[3], "" + (nums[0] + nums[1]));
-            Writer.write("Addition out: " + data.toString());
+            Utils.writeToFile(file, "Addition out: " + data.toString(), true);
         } else if ((data.indexOf("-") > 0 && data.indexOf("+") != -1 && data.indexOf("-") < data.indexOf("+")) || (data.indexOf("-") != -1 && data.indexOf("+") == -1)) {
             // If there is a subtraction symbol for an operation (not a negative number) before an addition symbol OR no addition symbol exists but a subtraction symbol does
-            Writer.write("Subtraction in: " + data.toString());
+            Utils.writeToFile(file, "Subtraction in: " + data.toString(), true);
             double[] nums = getNums(data.toString(), '-');
             data.replace((int) nums[2], (int) nums[3], "" + (nums[0] - nums[1]));
-            Writer.write("Subtraction out: " + data.toString());
+            Utils.writeToFile(file, "Subtraction out: " + data.toString(), true);
         }
 
         String s = data.toString();
@@ -117,7 +118,7 @@ public class Algebraic {
             data.replace(0, data.length(), solve(s));
         displayAnswer = true;
 
-        Writer.write("Out: " + data.toString() + System.lineSeparator());
+        Utils.writeToFile(file, "Out: " + data.toString() + System.lineSeparator(), true);
         return data.toString();
     }
 
@@ -176,7 +177,6 @@ public class Algebraic {
                 break;
             }
             if ((data.charAt(i) != '.' && !Character.isDigit(data.charAt(i))) || i == data.length() - 1) { // If the character at index i is an operator or it is the end of the string
-                System.out.println(index + ", " + i);
                 if (i == data.length() - 1) {
                     nums[1] = Double.parseDouble(data.substring(index + 1, i + 1));
                     nums[3] = i + 1;
@@ -215,6 +215,7 @@ public class Algebraic {
     }
 
     private void init() {
+        file = new File(System.getProperty("user.home") + "/Desktop/calculator/algebraic.txt");
         Scene main;
         Pane layout;
 
@@ -370,7 +371,6 @@ public class Algebraic {
         // Backspace
         newButton("<", (int) buttons.get(18).getLayoutX() - 40, (int) buttons.get(18).getLayoutY(), 0, 0, buttonsFont, e -> {
             if (nav && !two.toString().startsWith("<")) {
-                System.out.println(two.toString());
                 two.replace(two.indexOf("<") - 1, two.indexOf("<"), "");
                 setText();
                 return;
@@ -471,7 +471,7 @@ public class Algebraic {
         });
 
         // Square
-        newButton("x^2", (int) buttons.get(23).getLayoutX() - 40, (int) buttons.get(23).getLayoutY(), 34, 34, new Font("Consolas", 11), e -> {
+        newButton("^2", (int) buttons.get(23).getLayoutX() - 40, (int) buttons.get(23).getLayoutY(), 34, 34, new Font("Consolas", 12), e -> {
             if (displayAnswer) {
                 two.replace(0, two.length(), "");
                 displayAnswer = false;
@@ -481,7 +481,7 @@ public class Algebraic {
         });
 
         // Cube
-        newButton("x^3", (int) buttons.get(29).getLayoutX(), (int) buttons.get(29).getLayoutY() - 40, 34, 34, new Font("Consolas", 11), e -> {
+        newButton("^3", (int) buttons.get(29).getLayoutX(), (int) buttons.get(29).getLayoutY() - 40, 34, 34, new Font("Consolas", 12), e -> {
             if (displayAnswer) {
                 two.replace(0, two.length(), "");
                 displayAnswer = false;
@@ -491,12 +491,12 @@ public class Algebraic {
         });
 
         // Raise to power
-        newButton("x^y", (int) buttons.get(30).getLayoutX(), (int) buttons.get(30).getLayoutY() - 40, 34, 34, new Font("Consolas", 11), e -> {
+        newButton("^y", (int) buttons.get(30).getLayoutX(), (int) buttons.get(30).getLayoutY() - 40, 34, 34, new Font("Consolas", 12), e -> {
             if (displayAnswer) {
                 two.replace(0, two.length(), "");
                 displayAnswer = false;
             }
-            if (!one.equals("0")) two.append(one.toString() + "^");
+            if (!one.toString().equals("0")) two.append(one.toString() + "^");
             one.replace(0, one.length(), "0");
             setText();
         });
@@ -691,7 +691,7 @@ public class Algebraic {
         });
 
         equation.setOnAction(e -> {
-            new Equation();
+            new EqCalc();
             window.close();
         });
 
@@ -700,9 +700,9 @@ public class Algebraic {
             window.close();
         });
 
-        shortcuts.setOnAction(e -> Display.show("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
+        shortcuts.setOnAction(e -> Utils.popUp("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
 
-        formulas.setOnAction(e -> Display.show("Formulas", "Area of a rectangle: w * h\nPermieter of a rectangle: 2w + 2l\nArea of a circle: \u03C0r^2\nCircumference of a circle: 2\u03C0r\nSine: Opposite/Hypotenuse\nCosine: Adjacent/Hypotenuse\nTangent: Opposite/Adjacent", 130, 225));
+        formulas.setOnAction(e -> Utils.popUp("Formulas", "Area of a rectangle: w * h\nPermieter of a rectangle: 2w + 2l\nArea of a circle: \u03C0r^2\nCircumference of a circle: 2\u03C0r\nSine: Opposite/Hypotenuse\nCosine: Adjacent/Hypotenuse\nTangent: Opposite/Adjacent", 130, 225));
 
         result = new TextArea();
         result.setFont(tArea);

@@ -1,7 +1,7 @@
 package standard;
 
 import algebraic.Algebraic;
-import equation.Equation;
+import equation.EqCalc;
 import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -14,29 +14,22 @@ import javafx.scene.input.KeyEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
-import main.Display;
+import utils.Utils;
 
 public class Standard {
 
     private Stage window;
-    private Scene main;
     private Pane layout;
 
     private Button[] digits;
     private Button[] operators;
     private Button clear, clearE, backspace, decimal, sign, sqrt, reciprocal, equals;
-
     private TextArea result;
-
-    private MenuBar bar;
-    private Menu view, help;
     private MenuItem equation, algebraic, shortcuts;
-
-    private String fline, sline;
+    private String lineOne, lineTwo;
     private double one, two, answer;
     private byte lastOp, currOp;
-
-    private Font buttons, tArea;
+    private boolean showAnswer;
 
     public Standard() {
         init();
@@ -64,10 +57,10 @@ public class Standard {
             }
         });
 
-        shortcuts.setOnAction(e -> Display.show("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
+        shortcuts.setOnAction(e -> Utils.popUp("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
 
         equation.setOnAction(e -> {
-            new Equation();
+            new EqCalc();
             window.close();
         });
 
@@ -79,8 +72,11 @@ public class Standard {
         for (byte i = 0; i < digits.length; i++) {
             byte o = i;
             digits[i].setOnAction(e -> {
-                if (fline.equals("0")) fline = digits[o].getText();
-                else fline += digits[o].getText();
+                if (showAnswer) {
+                    lineOne = digits[o].getText();
+                    showAnswer = false;
+                } else if (lineOne.equals("0")) lineOne = digits[o].getText();
+                else lineOne += digits[o].getText();
                 setText();
             });
         }
@@ -91,70 +87,74 @@ public class Standard {
         }
 
         backspace.setOnAction(e -> {
-            if (!fline.equals("0")) {
-                fline = fline.substring(0, fline.length() - 1);
-                if (fline.equals("")) fline = "0";
+            if (!lineOne.equals("0")) {
+                lineOne = lineOne.substring(0, lineOne.length() - 1);
+                if (lineOne.equals("")) lineOne = "0";
                 setText();
             }
         });
 
         decimal.setOnAction(e -> {
-            if (!fline.contains(".")) fline += decimal.getText();
+            if (showAnswer) {
+                lineOne = "0.";
+                showAnswer = false;
+            } else if (!lineOne.contains(".")) lineOne += decimal.getText();
             setText();
         });
 
         equals.setOnAction(e -> {
-            two = Double.parseDouble(fline);
+            showAnswer = true;
+            two = Double.parseDouble(lineOne);
             answer();
-            fline = answer + "";
-            sline = "";
+            lineOne = answer + "";
+            lineTwo = "";
             setText();
         });
 
         clearE.setOnAction(e -> {
-            fline = "0";
+            lineOne = "0";
             setText();
         });
 
         clear.setOnAction(e -> {
-            fline = "0";
-            sline = "";
+            lineOne = "0";
+            lineTwo = "";
             setText();
         });
 
         sign.setOnAction(e -> {
-            if (fline.startsWith("-")) fline = fline.substring(1, fline.length());
-            else fline = "-" + fline;
+            if (lineOne.startsWith("-")) lineOne = lineOne.substring(1, lineOne.length());
+            else lineOne = "-" + lineOne;
             setText();
         });
 
         sqrt.setOnAction(e -> {
-            double d = Double.parseDouble(fline);
-            fline = Math.sqrt(d) + "";
+            double d = Double.parseDouble(lineOne);
+            lineOne = Math.sqrt(d) + "";
             setText();
         });
 
         reciprocal.setOnAction(e -> {
-            double d = Double.parseDouble(fline);
-            fline = 1 / d + "";
+            double d = Double.parseDouble(lineOne);
+            lineOne = 1 / d + "";
             setText();
         });
     }
 
     private void op(byte op) {
-        if (fline.equals("0")) return;
-        if (sline.equals("")) {
+        if (lineOne.equals("0")) return;
+        if (lineTwo.equals("")) {
             lastOp = op;
-            one = Double.parseDouble(fline);
-            sline = fline + operators[op].getText();
-            fline = "0";
+            one = Double.parseDouble(lineOne);
+            lineTwo = lineOne + operators[op].getText();
+            lineOne = "0";
         } else {
             currOp = op;
-            two = Double.parseDouble(fline);
+            two = Double.parseDouble(lineOne);
             answer();
-            fline = "0";
+            lineOne = "0";
             lastOp = currOp;
-            sline = answer + operators[lastOp].getText();
+            lineTwo = answer + operators[lastOp].getText();
             one = answer;
         }
         setText();
@@ -181,10 +181,11 @@ public class Standard {
     }
 
     private void setText() {
-        result.setText(sline + "\n" + fline);
+        result.setText(lineTwo + "\n" + lineOne);
     }
 
     private void init() {
+        Scene main;
         window = new Stage();
         layout = new Pane();
         main = new Scene(layout);
@@ -193,16 +194,20 @@ public class Standard {
         window.setHeight(325);
         window.setResizable(false);
 
-        fline = "0";
-        sline = "";
+        lineOne = "0";
+        lineTwo = "";
         lastOp = -1;
         currOp = -1;
 
         digits = new Button[10];
         operators = new Button[5];
 
+        Font buttons, tArea;
         buttons = new Font("Consolas", 18);
         tArea = new Font("Consolas", 18);
+
+        MenuBar bar;
+        Menu view, help;
 
         bar = new MenuBar();
         bar.setMinWidth(window.getWidth());
