@@ -67,9 +67,12 @@ public class SingleVariable extends Equation {
 
             if (l.toString().startsWith("+")) l.deleteCharAt(0);
 
+            Utils.writeToFile(file, "Isolate the variable: " + l.toString() + " = " + r.toString(), true);
+            Utils.writeToFile(file, "Simplify each side: ", true);
+
             left = new Side(l.toString(), file);
             right = new Side(r.toString(), file);
-            double divideBy, rightSide;
+            double divideBy;
 
             // Find the index of the variable
             byte index = -1;
@@ -80,32 +83,40 @@ public class SingleVariable extends Equation {
                 }
             }
 
-            if (left.getString().contains("^")) {
-                if ((left.getString().contains("+") || left.getString().contains("-") || left.getString().contains("*") || left.getString().contains("/")) || left.getString().charAt(left.getString().indexOf("^") + 1) == variable)
-                    solved = left.getString() + " = " + right.getString();
-                else {
-                    System.out.println("yes");
-                    // Find the coefficient of the variable and divide the right side by it to solve the equation
-                    if (left.getString().substring(0, index).equals("-")) divideBy = -1;
-                    else if (!left.getString().substring(0, index).isEmpty())
-                        divideBy = Double.parseDouble(left.getString().substring(0, index));
-                    else divideBy = 1;
+            l.replace(0, l.length(), left.getString());
+            r.replace(0, r.length(), right.getString());
 
-                    if (left.getString().contains("^"))
-                        rightSide = Utils.nthRoot(Double.parseDouble(right.getString()) / divideBy, Integer.parseInt(left.getString().substring(index + 2, left.getString().length())));
-                    else rightSide = Double.parseDouble(right.getString()) / divideBy;
+            Utils.writeToFile(file, "", true);
+            Utils.writeToFile(file, "Before finding solution: " + l.toString() + " = " + r.toString(), true);
 
-                    if (divideBy != 0)
-                        solved = variable + " = " + rightSide;
-                    else
-                        solved = "0 = " + rightSide;
-                }
+            if (left.getString().contains("^") && ((left.getString().contains("+") || left.getString().contains("-") || left.getString().contains("*") || left.getString().contains("/")) || left.getString().charAt(left.getString().indexOf("^") + 1) == variable))
+                solved = left.getString() + " = " + right.getString();
+            else {
+                if (left.getString().substring(0, index).equals("-")) divideBy = -1;
+                else if (left.getString().substring(0, index).isEmpty())
+                    divideBy = 1;
+                else divideBy = Double.parseDouble(left.getString().substring(0, index));
+
+                r.replace(0, r.length(), "" + Double.parseDouble(r.toString()) / divideBy);
+
+                if (left.getString().contains("^"))
+                    r.replace(0, r.length(), "" + Utils.nthRoot(Double.parseDouble(r.toString()), Integer.parseInt(left.getString().substring(left.getString().indexOf("^") + 1, left.getString().length()))));
+
+                l.delete(l.indexOf("^"), l.length());
+
+                Utils.writeToFile(file, "", true);
+                Utils.writeToFile(file, "After simplifying powers: " + l.toString() + " = " + r.toString(), true);
+                Utils.writeToFile(file, "", true);
+
+                if (divideBy != 0)
+                    solved = variable + " = " + r.toString();
+                else
+                    solved = "0 = " + r.toString();
             }
         }
         Utils.writeToFile(file, "Solution: " + solved, true);
         Utils.writeToFile(file, "", true);
     }
-
 
     private ArrayList<String> getVariables(String s) {
         ArrayList<String> vars = new ArrayList<>();

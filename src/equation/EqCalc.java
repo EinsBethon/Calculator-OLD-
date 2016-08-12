@@ -15,7 +15,7 @@ public class EqCalc {
 
     private Stage window;
     private TextField first, second;
-    private Label answer;
+    private TextArea answer;
 
     public EqCalc() {
         init();
@@ -108,7 +108,8 @@ public class EqCalc {
             }
         });
 
-        answer = new Label();
+        answer = new TextArea();
+        answer.setEditable(false);
         answer.setFont(new Font("Consolas", 20));
         answer.setLayoutY(115);
 
