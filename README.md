@@ -5,11 +5,3 @@ A calculator history can be recorded if the following files are created(History 
   Created folder named "calculator" on your Desktop
     In calculator create a folder named "equation" and a text file named "algebraic"
       In equation, create two text files: "Single" and "Linear"
-The folders and files should look like this:
-
-  Desktop
-    >calculator
-      >algebraic.txt
-      >equation
-        >Linear.txt
-        >Single.txt
