@@ -54,7 +54,7 @@ public class Side {
         }
 
         //Perform operations following PEMDAS
-        if (data.indexOf("^") != -1 && validOperation(data.toString(), '^')) {
+        if (data.indexOf("^") != -1 && canBeSimplified(data.toString(), '^')) {
             Utils.writeToFile(file, "Exponent in: " + data.toString(), true);
             String[] operands = Utils.getOperands(data.toString(), '^');
             if (!containsLetters(operands[0]) && !containsLetters(operands[1]))
@@ -62,7 +62,7 @@ public class Side {
             Utils.writeToFile(file, "Exponent out: " + data.toString(), true);
         }
 
-        if (validOperation(data.toString(), '*') && ((data.indexOf("*") != -1 && data.indexOf("/") != -1 && data.indexOf("*") < data.indexOf("/")) || (data.indexOf("*") != -1 && data.indexOf("/") == -1))) {
+        if (canBeSimplified(data.toString(), '*') && ((data.indexOf("*") != -1 && data.indexOf("/") != -1 && data.indexOf("*") < data.indexOf("/")) || (data.indexOf("*") != -1 && data.indexOf("/") == -1))) {
             Utils.writeToFile(file, "Multiplication in: " + data.toString(), true);
             String[] operands = Utils.getOperands(data.toString(), '*');
 
@@ -111,7 +111,7 @@ public class Side {
             } else
                 data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (Double.parseDouble(operands[0]) * Double.parseDouble(operands[1])));
             Utils.writeToFile(file, "Multiplication out: " + data.toString(), true);
-        } else if (validOperation(data.toString(), '/') && ((data.indexOf("/") != -1 && data.indexOf("*") != -1 && data.indexOf("/") < data.indexOf("*")) || (data.indexOf("/") != -1 && data.indexOf("*") == -1) || (data.indexOf("/") > 0 && !validOperation(data.toString(), '*')))) {
+        } else if (canBeSimplified(data.toString(), '/') && ((data.indexOf("/") != -1 && data.indexOf("*") != -1 && data.indexOf("/") < data.indexOf("*")) || (data.indexOf("/") != -1 && data.indexOf("*") == -1) || (data.indexOf("/") > 0 && !canBeSimplified(data.toString(), '*')))) {
             Utils.writeToFile(file, "Division in: " + data.toString(), true);
             String[] operands = Utils.getOperands(data.toString(), '/');
 
@@ -160,7 +160,7 @@ public class Side {
             Utils.writeToFile(file, "Division out: " + data.toString(), true);
         }
 
-        if (validOperation(data.toString(), '+') && ((data.indexOf("+") != -1 && data.indexOf("-") != -1 && data.indexOf("+") < data.indexOf("-")) || (data.indexOf("+") != -1 && data.indexOf("-") == -1))) {
+        if (canBeSimplified(data.toString(), '+') && ((data.indexOf("+") != -1 && data.indexOf("-") != -1 && data.indexOf("+") < data.indexOf("-")) || (data.indexOf("+") != -1 && data.indexOf("-") == -1))) {
             Utils.writeToFile(file, "Addition in: " + data.toString(), true);
             String[] operands = Utils.getOperands(data.toString(), '+');
 
@@ -189,7 +189,7 @@ public class Side {
             } else
                 data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (Double.parseDouble(operands[0]) + Double.parseDouble(operands[1])));
             Utils.writeToFile(file, "Addition out: " + data.toString(), true);
-        } else if (validOperation(data.toString(), '-') && ((data.indexOf("-") > 0 && data.indexOf("+") != -1 && data.indexOf("-") < data.indexOf("+")) || ((data.indexOf("-") > 0 || data.indexOf("-") != -1) && data.indexOf("+") == -1) || (data.indexOf("-") > 0 && !validOperation(data.toString(), '+')))) {
+        } else if (canBeSimplified(data.toString(), '-') && ((data.indexOf("-") > 0 && data.indexOf("+") != -1 && data.indexOf("-") < data.indexOf("+")) || ((data.indexOf("-") > 0 || data.indexOf("-") != -1) && data.indexOf("+") == -1) || (data.indexOf("-") > 0 && !canBeSimplified(data.toString(), '+')))) {
             Utils.writeToFile(file, "Subtraction in: " + data.toString(), true);
             String[] operands = Utils.getOperands(data.toString(), '-');
             if (containsLetters(operands[0]) || containsLetters(operands[1])) {
@@ -264,7 +264,7 @@ public class Side {
     }
 
     private boolean simplified(String data) {
-        if (!validOperation(data, '^') && !validOperation(data, '*') && !validOperation(data, '/') && !validOperation(data, '+') && !validOperation(data, '-') && !data.contains("(")) {
+        if (!canBeSimplified(data, '^') && !canBeSimplified(data, '*') && !canBeSimplified(data, '/') && !canBeSimplified(data, '+') && !canBeSimplified(data, '-') && !data.contains("(")) {
             if (Utils.getNextNumber(data).length() == data.length()) return true;
             String s = data.substring(Utils.getNextNumber(data).length() + 1, data.length());
             if (s.contains("^") || s.contains("*") || s.contains("/") || s.contains("+") || s.indexOf("-") > 0) {
@@ -275,7 +275,7 @@ public class Side {
         return false;
     }
 
-    private boolean validOperation(String s, char operator) {
+    private boolean canBeSimplified(String s, char operator) {
         String[] operands = Utils.getOperands(s, operator);
         if (operands[0] != null && operands[1] != null && operands[2] != null && operands[3] != null) {
             if (operator == '^' && (containsLetters(operands[1]) || containsLetters(operands[0]))) return false;

@@ -99,10 +99,10 @@ public class SingleVariable extends Equation {
 
                 r.replace(0, r.length(), "" + Double.parseDouble(r.toString()) / divideBy);
 
-                if (left.getString().contains("^"))
+                if (left.getString().contains("^")) {
                     r.replace(0, r.length(), "" + Utils.nthRoot(Double.parseDouble(r.toString()), Integer.parseInt(left.getString().substring(left.getString().indexOf("^") + 1, left.getString().length()))));
-
-                l.delete(l.indexOf("^"), l.length());
+                    l.delete(l.indexOf("^"), l.length());
+                }
 
                 Utils.writeToFile(file, "", true);
                 Utils.writeToFile(file, "After simplifying powers: " + l.toString() + " = " + r.toString(), true);
