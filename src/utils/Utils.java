@@ -21,40 +21,6 @@ public class Utils {
     private static Button ok;
     private static Pane layout;
 
-    public static String[] getOperands(String data, char c) {
-        String[] nums = new String[4];
-        /*
-        * 0 = the first operand
-        * 1 = the second operand
-        * 2 = the first index
-        * 3 = the second index
-        */
-        byte index;
-        if (data.startsWith(c + "")) index = (byte) (data.substring(1, data.length()).indexOf(c) + 1);
-            // If a negative number starts the expression, find the next occurrence of a subtraction symbol and add one to compensate for the subtraction symbol omitted from the beginning
-        else index = (byte) data.indexOf(c);
-
-        // Find first operand (Going to the left of the operator in the string)
-        for (byte i = (byte) (index - 1); i >= 0; i--) {
-            if ((i != 0 && data.charAt(i) == '-' && !Character.isDigit(data.charAt(i - 1)) && !Character.isLetter(data.charAt(i - 1))) || i == 0) {
-                nums[0] = data.substring(i, index);
-                if (i == 0) nums[2] = i + "";
-                else nums[2] = i + 1 + "";
-                break;
-            } else if (data.charAt(i) != '.' && !Character.isDigit(data.charAt(i)) && !Character.isLetter(data.charAt(i))) {
-                nums[0] = data.substring(i + 1, index);
-                nums[2] = i + 1 + "";
-                break;
-            }
-        }
-
-
-        // Find second operand (Going to the right of the operator in the string)
-        nums[1] = getNextNumber(data.substring(index + 1, data.length()));
-        nums[3] = index + 1 + nums[1].length() + "";
-        return nums;
-    }
-
     public static String getNextNumber(String s) {
         if (s.length() == 1) return s;
         for (byte i = 1; i < s.length(); i++) {
@@ -74,8 +40,8 @@ public class Utils {
         return false;
     }
 
-    public static double nthRoot(Double number, int root) {
-        return Math.pow(number, (double) 1 / (double) root);
+    public static double nthRoot(double number, double root) {
+        return Math.pow(number, (double) 1 / root);
     }
 
     public static byte variableCount(String s) {
@@ -157,4 +123,5 @@ public class Utils {
         window.setResizable(false);
         window.show();
     }
+
 }

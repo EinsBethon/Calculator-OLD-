@@ -9,175 +9,124 @@ public class SingleVariable extends Equation {
 
     public SingleVariable(String data, File file) {
         this.file = file;
-        if (valid(removeSpaces(data))) solve(removeSpaces(data));
+        if (validEquation(removeSpaces(data))) solve(removeSpaces(data));
         else
             Utils.popUp("Invalid equation", "Equation: " + data + "\nis invalid. Please revise it to continue.", 200, 125);
     }
 
     protected void solve(String input) {
-        Side left, right;
-        left = new Side(input.substring(0, input.indexOf("=")), file);
-        Utils.writeToFile(file, "\n", true);
-        right = new Side(input.substring(input.indexOf("=") + 1), file);
-        Utils.writeToFile(file, "\n", true);
+        StringBuilder left = new StringBuilder(Equation.simplifySideSV(input.substring(0, input.indexOf("="))));
+        Utils.writeToFile(file, "", true);
+        StringBuilder right = new StringBuilder(Equation.simplifySideSV(input.substring(input.indexOf("=") + 1, input.length())));
 
-        StringBuilder l = new StringBuilder(left.getString());
-        StringBuilder r = new StringBuilder(right.getString());
-
-        char variable = '0';
-        if (Utils.containsLetters(l.toString())) {
-            for (byte i = 0; i < l.toString().length(); i++) {
-                if (Character.isLetter(l.toString().charAt(i))) {
-                    variable = l.toString().charAt(i);
-                    break;
-                }
-            }
-        }
-
-        // Get variables and coefficients
+        //Add all variables to the left
         if (Utils.containsLetters(right.toString())) {
-            ArrayList<String> vars = getVariables(r.toString());
-            r.replace(0, r.length(), vars.get(vars.size() - 1));
-            double v = 0;
-            for (byte i = 0; i < vars.size() - 1; i++) {
-                v += Double.parseDouble(vars.get(i).substring(0, vars.get(i).length() - 1));
-            }
-            v *= -1;
+            ArrayList<String> variables = new ArrayList<>();
 
-            // Get constants
-            ArrayList<String> constants = getConstants(l.toString());
-            l.replace(0, l.length(), constants.get(constants.size() - 1));
-            double c = 0;
-            for (byte i = 0; i < constants.size() - 1; i++) {
-                c += Double.parseDouble(constants.get(i).substring(0, constants.get(i).length() - 1));
-            }
-            c *= -1;
+            for (byte i = 0; i < right.length(); ) {
+                String s = Utils.getNextNumber(right.substring(i, right.toString().length()));
+                // If the number is in an addition or subtraction operation OR is alone
+                if (Utils.containsLetters(s) && (i == 0 || (i > 0 && (right.charAt(i - 1) == '-' || right.charAt(i - 1) == '+'))) && (i + s.length() >= right.length() || (i + s.length() < right.length() && (right.charAt(i + s.length()) == '-' || right.charAt(i + s.length()) == '+')))) {
+                    if (s.startsWith("-")) {
+                        variables.add(s);
+                        right.delete(i, i + s.length());
+                    } else {
+                        variables.add("-" + s);
+                        if (i > 0) right.delete(i - 1, i + s.length());
+                        else right.delete(i, i + s.length());
+                    }
+                }
 
-            // Add all variables and their coefficients to the left side
-            if (v != 0) {
-                if (v > 0 && !l.toString().endsWith("+")) l.append("+").append(v).append(variable);
-                else l.append(v).append(variable);
-            }
-
-            // Add constants to right side
-            if (c != 0 && !r.toString().endsWith("+")) {
-                if (c > 0) r.append("+").append(c);
-                else r.append(c);
+                if (i + s.length() + 1 < right.length()) {
+                    if (right.charAt(i + s.length() + 1) == '-') i += s.length();
+                    else i += s.length() + 1;
+                } else break;
             }
 
-            if (l.toString().startsWith("+")) l.deleteCharAt(0);
+            for (String s : variables) {
+                left.append(s);
+            }
+        }
 
-            Utils.writeToFile(file, "Isolate the variable: " + l.toString() + " = " + r.toString(), true);
-            Utils.writeToFile(file, "Simplify each side: ", true);
+        Utils.writeToFile(file, "Isolate the variable: " + left.toString() + " = " + right.toString(), true);
 
-            left = new Side(l.toString(), file);
-            right = new Side(r.toString(), file);
-            double divideBy;
+        //Add all constants to the right
+        ArrayList<Double> constants = new ArrayList<>();
 
-            // Find the index of the variable
-            byte index = -1;
-            for (byte i = 0; i < left.getString().length(); i++) {
-                if (Character.isLetter(left.getString().charAt(i))) {
-                    index = i;
+        for (byte i = 0; i < left.length(); ) {
+            String s = Utils.getNextNumber(left.substring(i, left.toString().length()));
+            if (!Utils.containsLetters(s) && (i == 0 || (i > 0 && (left.charAt(i - 1) == '-' || left.charAt(i - 1) == '+'))) && (i + s.length() >= left.length() || (i + s.length() < left.length() && (left.charAt(i + s.length()) == '-' || left.charAt(i + s.length()) == '+')))) {
+                if (s.startsWith("-")) {
+                    constants.add(Double.parseDouble(s));
+                    left.delete(i, i + s.length());
+                } else {
+                    constants.add(-Double.parseDouble(s));
+                    if (i > 0) left.delete(i - 1, i + s.length());
+                    else left.delete(i, i + s.length());
+                }
+            }
+
+            if (i + s.length() + 1 < left.length()) {
+                if (left.charAt(i + s.length() + 1) == '-') i += s.length();
+                else i += s.length() + 1;
+            } else break;
+        }
+
+        for (double d : constants) {
+            double n = 0;
+            n += d;
+            right.append(n);
+        }
+
+        Utils.writeToFile(file, "Add all constants to one side: " + left.toString() + " = " + right.toString(), true);
+
+        left.replace(0, left.length(), Equation.simplifySideSV(left.toString()));
+        right.replace(0, right.length(), Equation.simplifySideSV(right.toString()));
+        Utils.writeToFile(file, "Simplify both sides: " + left.toString() + " = " + right.toString(), true);
+
+        //If the equation contains the variable and the variable raised to a power ex. 2x(x + 3) = 12
+        if (Utils.containsLetters(left.toString())) {
+            char var = ' ';
+            for (byte i = 0; i < left.length(); i++) {
+                if (Character.isLetter(left.charAt(i))) {
+                    var = left.charAt(i);
                     break;
                 }
             }
 
-            l.replace(0, l.length(), left.getString());
-            r.replace(0, r.length(), right.getString());
-
-            Utils.writeToFile(file, "", true);
-            Utils.writeToFile(file, "Before finding solution: " + l.toString() + " = " + r.toString(), true);
-
-            if (left.getString().contains("^") && ((left.getString().contains("+") || left.getString().contains("-") || left.getString().contains("*") || left.getString().contains("/")) || left.getString().charAt(left.getString().indexOf("^") + 1) == variable))
-                solved = left.getString() + " = " + right.getString();
-            else {
-                if (left.getString().substring(0, index).equals("-")) divideBy = -1;
-                else if (left.getString().substring(0, index).isEmpty())
-                    divideBy = 1;
-                else divideBy = Double.parseDouble(left.getString().substring(0, index));
-
-                r.replace(0, r.length(), "" + Double.parseDouble(r.toString()) / divideBy);
-
-                if (left.getString().contains("^")) {
-                    r.replace(0, r.length(), "" + Utils.nthRoot(Double.parseDouble(r.toString()), Integer.parseInt(left.getString().substring(left.getString().indexOf("^") + 1, left.getString().length()))));
-                    l.delete(l.indexOf("^"), l.length());
-                }
-
-                Utils.writeToFile(file, "", true);
-                Utils.writeToFile(file, "After simplifying powers: " + l.toString() + " = " + r.toString(), true);
-                Utils.writeToFile(file, "", true);
-
-                if (divideBy != 0)
-                    solved = variable + " = " + r.toString();
-                else
-                    solved = "0 = " + r.toString();
-            }
+            if (Utils.containsLetters(left.toString()) && left.toString().contains("^"))
+                solved = left.toString() + " = " + right.toString();
         }
+
+        if (solved.equals("")) {
+            // Simplify exponents
+            if (left.toString().contains("^")) {
+                double exponent = Double.parseDouble(left.substring(left.indexOf("^") + 1, left.length()));
+                double number = Double.parseDouble(right.toString());
+                left.delete(left.indexOf("^"), left.length());
+                right.replace(0, right.length(), "" + Utils.nthRoot(number, exponent));
+            }
+
+            // Divide both sides by the variable
+            if (Utils.containsLetters(left.toString())) {
+                double l;
+                double r;
+                if (!right.toString().isEmpty()) r = Double.parseDouble(right.toString());
+                else r = 0;
+                char variable = left.charAt(left.length() - 1);
+
+                if (left.length() == 1) l = 1;
+                else if (left.length() == 1 && left.toString().startsWith("-")) l = -1;
+                else l = Double.parseDouble(left.substring(0, left.length() - 1));
+
+                r /= l;
+
+                solved = variable + " = " + r;
+            } else solved = left.toString() + "" + right.toString();
+        }
+
         Utils.writeToFile(file, "Solution: " + solved, true);
         Utils.writeToFile(file, "", true);
-    }
-
-    private ArrayList<String> getVariables(String s) {
-        ArrayList<String> vars = new ArrayList<>();
-        StringBuilder data = new StringBuilder(s);
-        for (byte i = 0; i < data.length(); i++) {
-            if (Utils.getNextNumber(data.toString()).length() != data.length()) {
-                if (Utils.containsLetters(Utils.getNextNumber(data.toString()))) {
-                    if ((data.charAt(Utils.getNextNumber(data.toString()).length()) == '+' || data.charAt(Utils.getNextNumber(data.toString()).length()) == '-')) {
-                        vars.add(data.substring(0, Utils.getNextNumber(data.toString()).length()));
-                        data.delete(0, Utils.getNextNumber(data.toString()).length());
-                    }
-                }
-            }
-
-            if (data.charAt(i) == '-') {
-                if (Utils.containsLetters(Utils.getNextNumber(data.substring(i, data.length())))) {
-                    vars.add(Utils.getNextNumber(data.substring(i, data.length())));
-                    String e = Utils.getNextNumber(data.substring(i, data.length()));
-                    data.delete(i, i + e.length());
-                } else i += Utils.getNextNumber(data.substring(i, data.length())).length() - 1;
-            } else if (data.charAt(i) == '+') {
-                if (Utils.containsLetters(Utils.getNextNumber(data.substring(i + 1, data.length())))) {
-                    vars.add(Utils.getNextNumber(data.substring(i + 1, data.length())));
-                    String e = Utils.getNextNumber(data.substring(i, data.length()));
-                    data.delete(i, i + e.length());
-                } else i += Utils.getNextNumber(data.substring(i + 1, data.length())).length() - 1;
-            }
-        }
-        vars.add(data.toString());
-        return vars;
-    }
-
-    private ArrayList<String> getConstants(String s) {
-        ArrayList<String> constants = new ArrayList<>();
-        StringBuilder data = new StringBuilder(s);
-        for (byte i = 0; i < data.length(); i++) {
-            if (Utils.getNextNumber(data.toString()).length() != data.length()) {
-                if (!Utils.containsLetters(Utils.getNextNumber(data.toString()))) {
-                    if ((data.charAt(Utils.getNextNumber(data.toString()).length()) == '+' || data.charAt(Utils.getNextNumber(data.toString()).length()) == '-')) {
-                        constants.add(data.substring(0, Utils.getNextNumber(data.toString()).length()));
-                        data.delete(0, Utils.getNextNumber(data.toString()).length());
-                    }
-                }
-            }
-
-            if (data.charAt(i) == '-') {
-                if (!Utils.containsLetters(Utils.getNextNumber(data.substring(i, data.length())))) {
-                    constants.add(Utils.getNextNumber(data.substring(i, data.length())));
-                    String e = Utils.getNextNumber(data.substring(i, data.length()));
-                    data.delete(i, i + e.length());
-                } else i += Utils.getNextNumber(data.substring(i, data.length())).length() - 1;
-            } else if (data.charAt(i) == '+') {
-                if (!Utils.containsLetters(Utils.getNextNumber(data.substring(i + 1, data.length())))) {
-                    constants.add(Utils.getNextNumber(data.substring(i + 1, data.length())));
-                    String e = Utils.getNextNumber(data.substring(i, data.length()));
-                    data.delete(i, i + e.length());
-                } else i += Utils.getNextNumber(data.substring(i + 1, data.length())).length() - 1;
-            }
-        }
-        constants.add(data.toString());
-        return constants;
     }
 
 }

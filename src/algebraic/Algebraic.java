@@ -702,7 +702,7 @@ public class Algebraic {
 
         shortcuts.setOnAction(e -> Utils.popUp("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
 
-        formulas.setOnAction(e -> Utils.popUp("Formulas", "Area of a rectangle: w * h\nPermieter of a rectangle: 2w + 2l\nArea of a circle: \u03C0r^2\nCircumference of a circle: 2\u03C0r\nSine: Opposite/Hypotenuse\nCosine: Adjacent/Hypotenuse\nTangent: Opposite/Adjacent", 130, 225));
+        formulas.setOnAction(e -> Utils.popUp("Formulas", "Area of a rectangle: w * h\nPerimeter of a rectangle: 2w + 2l\nArea of a circle: \u03C0r^2\nCircumference of a circle: 2\u03C0r\nSine: Opposite/Hypotenuse\nCosine: Adjacent/Hypotenuse\nTangent: Opposite/Adjacent", 130, 225));
 
         result = new TextArea();
         result.setFont(tArea);
