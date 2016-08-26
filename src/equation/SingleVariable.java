@@ -101,6 +101,37 @@ public class SingleVariable extends Equation {
         }
 
         if (solved.equals("")) {
+            // Divide both sides by the variable
+            if (Utils.containsLetters(left.toString())) {
+                double l;
+                double r;
+                if (!right.toString().isEmpty()) r = Double.parseDouble(right.toString());
+                else r = 0;
+                char variable = ' ';
+
+                for (byte i = 0; i < left.length(); i++) {
+                    if (Character.isLetter(left.charAt(i))) {
+                        variable = left.charAt(i);
+                        break;
+                    }
+                }
+
+                if (left.length() == 1) l = 1;
+                else if (left.length() == 1 && left.toString().startsWith("-")) l = -1;
+                else {
+                    System.out.println(left.toString() + "\t" + left.indexOf(variable + "") + "\t" + variable);
+                    if (left.toString().contains("^"))
+                        l = Double.parseDouble(left.substring(0, left.indexOf(variable + "")));
+                    else l = Double.parseDouble(left.substring(0, left.length() - 1));
+                }
+
+                r /= l;
+
+                right.replace(0, right.length(), r + "");
+                left.delete(0, left.indexOf(variable + ""));
+
+            }
+
             // Simplify exponents
             if (left.toString().contains("^")) {
                 double exponent = Double.parseDouble(left.substring(left.indexOf("^") + 1, left.length()));
@@ -109,24 +140,10 @@ public class SingleVariable extends Equation {
                 right.replace(0, right.length(), "" + Utils.nthRoot(number, exponent));
             }
 
-            // Divide both sides by the variable
-            if (Utils.containsLetters(left.toString())) {
-                double l;
-                double r;
-                if (!right.toString().isEmpty()) r = Double.parseDouble(right.toString());
-                else r = 0;
-                char variable = left.charAt(left.length() - 1);
-
-                if (left.length() == 1) l = 1;
-                else if (left.length() == 1 && left.toString().startsWith("-")) l = -1;
-                else l = Double.parseDouble(left.substring(0, left.length() - 1));
-
-                r /= l;
-
-                solved = variable + " = " + r;
-            } else solved = left.toString() + "" + right.toString();
+            Utils.writeToFile(file, "Simplify exponents: " + left.toString() + " = " + right.toString(), true);
         }
 
+        solved = left.toString() + " = " + right.toString();
         Utils.writeToFile(file, "Solution: " + solved, true);
         Utils.writeToFile(file, "", true);
     }
