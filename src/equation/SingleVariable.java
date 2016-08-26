@@ -86,6 +86,7 @@ public class SingleVariable extends Equation {
 
         //If the equation contains the variable and the variable raised to a power ex. 2x(x + 3) = 12
         if (Utils.containsLetters(left.toString())) {
+            StringBuilder s = new StringBuilder(left.toString());
             char var = ' ';
             for (byte i = 0; i < left.length(); i++) {
                 if (Character.isLetter(left.charAt(i))) {
@@ -93,8 +94,9 @@ public class SingleVariable extends Equation {
                     break;
                 }
             }
+            s.deleteCharAt(s.indexOf(var + ""));
 
-            if (Utils.containsLetters(left.toString()) && left.toString().contains("^"))
+            if (Utils.containsLetters(s.toString()) && s.toString().contains("^"))
                 solved = left.toString() + " = " + right.toString();
         }
 
