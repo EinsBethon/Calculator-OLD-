@@ -70,10 +70,23 @@ public abstract class Equation {
                                 if (data.charAt(b) == '-') n++;
                                 if (n <= 1) {
                                     if (b == 0) {
+                                        // Solve any other parenthetical expressions before distributing
+                                        if (data.substring(one + 1, two).contains("(")) {
+                                            data.replace(one + 1, two, simplifySideSV(data.substring(one + 1, two)));
+                                            data.replace(0, data.length(), correctOperators(data.toString()));
+                                            break;
+                                        }
+
                                         data.replace(0, two + 1, distribute(data.substring(one + 1, two), data.substring(0, one), single));
                                         data.replace(0, data.length(), correctOperators(data.toString()));
                                         break;
                                     } else if (!Character.isLetter(data.charAt(b)) && !Character.isDigit(data.charAt(b)) && data.charAt(b) != '.') {
+                                        if (data.substring(one + 1, two).contains("(")) {
+                                            data.replace(one + 1, two, simplifySideSV(data.substring(one + 1, two)));
+                                            data.replace(0, data.length(), correctOperators(data.toString()));
+                                            break;
+                                        }
+
                                         StringBuilder dist = new StringBuilder(distribute(data.substring(one + 1, two), data.substring(b, one), single));
                                         if (!dist.toString().startsWith("-")) dist.insert(0, '+');
                                         data.replace(b, two + 1, dist.toString());
@@ -84,13 +97,17 @@ public abstract class Equation {
                             }
                             // If there is a negative symbol on the outside of a parenthetical expression, distribute it as -1
                         } else if(one > 0 && (data.charAt(one - 1) == '-')) {
+                            if (data.substring(one + 1, two).contains("(")) {
+                                data.replace(one + 1, two, simplifySideSV(data.substring(one + 1, two)));
+                                data.replace(0, data.length(), correctOperators(data.toString()));
+                                break;
+                            }
+
                             data.replace(one - 1, two + 1, distribute(data.substring(one + 1, two), "-1", single));
                             data.replace(0, data.length(), correctOperators(data.toString()));
                         } else {
                             data.replace(one, two + 1, simplifySideSV(data.substring(one + 1, two)));
                             data.replace(0, data.length(), correctOperators(data.toString()));
-                            parentheses.remove(0);
-                            parentheses.remove(i - 1); //
                         }
 
                         if (!expIsSimplified(data.toString()))
