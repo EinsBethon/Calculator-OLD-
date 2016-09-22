@@ -26,27 +26,39 @@ public class SingleVariable extends Equation {
             for (byte i = 0; i < right.length(); ) {
                 String s = Utils.getNextNumber(right.substring(i, right.toString().length()));
                 // If the number has the variable in it and is in an addition or subtraction operation OR is alone
-                if (Utils.containsLetters(s) && (i == 0 || (i > 0 && (right.charAt(i - 1) == '-' || right.charAt(i - 1) == '+'))) && (i + s.length() >= right.length() || (i + s.length() < right.length() && (right.charAt(i + s.length()) == '-' || right.charAt(i + s.length()) == '+')))) {
+                if (Utils.containsLetters(s) && (i == 0 || (i > 0 && ((right.charAt(i - 1) == '-' || s.startsWith("-")) || right.charAt(i - 1) == '+'))) && (i + s.length() >= right.length() || (i + s.length() < right.length() && (right.charAt(i + s.length()) == '-' || right.charAt(i + s.length()) == '+')))) {
                     if (s.startsWith("-")) {
-                        variables.add(s);
+                        variables.add(s.substring(1, s.length()));
                         right.delete(i, i + s.length());
                     } else {
                         variables.add("-" + s);
                         if (i > 0) right.delete(i - 1, i + s.length());
                         else right.delete(i, i + s.length());
                     }
+                } else {
+                    if (i + s.length() + 1 < right.length()) {
+                        if (right.charAt(i + s.length()) == '-') i += s.length();
+                        else i += s.length() + 1;
+                    } else break;
                 }
-
-                if (i + s.length() + 1 < right.length()) {
-                    if (right.charAt(i + s.length() + 1) == '-') i += s.length();
-                    else i += s.length() + 1;
-                } else break;
             }
+
+            // Test cases
+            // 6n - 3(-3n + 2) = -24 + 6n                   -2
+            // -3(4x + 3) + 4(6x + 1) = 43                  4
+            // -5(1 - 5x) + 5(-8x - 2) = -4x - 8x           -5
+            // 2(4x-3)-8=4+2x
+            // 3n-5=-8(6 + 5n)                              -1
+            // (16 + (24 / 3)) * 3 = 9x                     8                   DOESN'T WORK
 
             for (String s : variables) {
-                left.append(s);
+                if(s.startsWith("-")) left.append(s);
+                else left.append("+").append(s);
             }
         }
+
+        if(left.toString().startsWith("+")) left.deleteCharAt(0);
+        if(right.toString().startsWith("+")) right.deleteCharAt(0);
 
         Utils.writeToFile(file, "Isolate the variable: " + left.toString() + " = " + right.toString(), true);
 
@@ -56,28 +68,32 @@ public class SingleVariable extends Equation {
         for (byte i = 0; i < left.length(); ) {
             String s = Utils.getNextNumber(left.substring(i, left.toString().length()));
             // If the number doesn't have the variable in it and is in an addition or subtraction operation OR is alone
-            if (!Utils.containsLetters(s) && (i == 0 || (i > 0 && (left.charAt(i - 1) == '-' || left.charAt(i - 1) == '+'))) && (i + s.length() >= left.length() || (i + s.length() < left.length() && (left.charAt(i + s.length()) == '-' || left.charAt(i + s.length()) == '+')))) {
+            if (!Utils.containsLetters(s) && (i == 0 || (i > 0 && ((left.charAt(i - 1) == '-' || s.startsWith("-")) || left.charAt(i - 1) == '+'))) && (i + s.length() >= left.length() || (i + s.length() < left.length() && (left.charAt(i + s.length()) == '-' || left.charAt(i + s.length()) == '+')))) {
                 if (s.startsWith("-")) {
-                    constants.add(Double.parseDouble(s));
+                    constants.add(Double.parseDouble(s.substring(1, s.length())));
                     left.delete(i, i + s.length());
                 } else {
                     constants.add(-Double.parseDouble(s));
                     if (i > 0) left.delete(i - 1, i + s.length());
                     else left.delete(i, i + s.length());
                 }
+            } else {
+                if (i + s.length() + 1 < left.length()) {
+                    if (left.charAt(i + s.length()) == '-') i += s.length();
+                    else i += s.length() + 1;
+                } else break;
             }
-
-            if (i + s.length() + 1 < left.length()) {
-                if (left.charAt(i + s.length() + 1) == '-') i += s.length();
-                else i += s.length() + 1;
-            } else break;
         }
 
         for (double d : constants) {
             double n = 0;
             n += d;
-            right.append(n);
+            if(n < 0) right.append(n);
+            else right.append("+").append(n);
         }
+
+        if(left.toString().startsWith("+")) left.deleteCharAt(0);
+        if(right.toString().startsWith("+")) right.deleteCharAt(0);
 
         Utils.writeToFile(file, "Add all constants to one side: " + left.toString() + " = " + right.toString(), true);
 

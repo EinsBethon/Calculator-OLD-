@@ -28,7 +28,7 @@ public class Utils {
             if (s.charAt(i) != '.' && !Character.isDigit(s.charAt(i)) && !Character.isLetter(s.charAt(i)))
                 return s.substring(0, i);
         }
-        return "";
+        return "getNextNumError";
     }
 
     public static boolean containsLetters(String s) {
