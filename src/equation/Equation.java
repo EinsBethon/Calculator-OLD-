@@ -25,7 +25,7 @@ public abstract class Equation {
         valid = false;
         for (byte i = 0, num = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (Character.isLetterOrDigit(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '=' || c == 'c' || c == '(' || c == ')' || c == '.')
+            if (Character.isLetterOrDigit(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '=' || c == 'c' || c == '(' || c == ')' || c == '.' || c == '|')
                 num++;
             if (num == s.length() - 1) {
                 valid = true;
@@ -202,11 +202,17 @@ public abstract class Equation {
                 if (Utils.containsLetters(operands[0]))
                     variable = operands[0].charAt(operands[0].length() - 1);
 
+                String outcome;
+
+                if(operands[0].startsWith("-") && Integer.parseInt(operands[2]) != 0 && (numbers[0] + numbers[1]) >= 0 && (Character.isLetter(data.charAt(Integer.parseInt(operands[2]) - 1)) || Character.isDigit(data.charAt(Integer.parseInt(operands[2]) - 1)))) {
+                    outcome = "+" + (numbers[0] + numbers[1]) + variable;
+                } else outcome = "" + (numbers[0] + numbers[1]) + variable;
+
                 if (variable != '0') {
-                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (numbers[0] + numbers[1]) + variable);
-                    Utils.writeToFile(single, "Addition out: " + (numbers[0] + numbers[1]) + variable, true);
+                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), outcome);
+                    Utils.writeToFile(single, "Addition out: " + outcome, true);
                 } else {
-                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (numbers[0] + numbers[1]));
+                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), outcome);
                     Utils.writeToFile(single, "Addition out: " + (numbers[0] + numbers[1]), true);
                 }
             }
@@ -272,43 +278,6 @@ public abstract class Equation {
 
         Utils.writeToFile(file, "Distribute out: " + correctOperators(data.toString()), true);
         return correctOperators(data.toString());
-    }
-
-    private static String addConstants(String exp) {
-        StringBuilder data = new StringBuilder(exp);
-        ArrayList<Double> constants = new ArrayList<>();
-
-        for (byte i = 0; i < data.length(); ) {
-            String s = Utils.getNextNumber(data.substring(i, data.toString().length()));
-            // If the number is in an addition or subtraction operation OR is alone
-            if (!Utils.containsLetters(Utils.getNextNumber(s)) && (i == 0 || (i > 0 && (data.charAt(i - 1) == '-' || data.charAt(i - 1) == '+'))) && (i + s.length() >= data.length() || (i + s.length() < data.length() && (data.charAt(i + s.length()) == '-' || data.charAt(i + s.length()) == '+')))) {
-                if (s.startsWith("-")) {
-                    constants.add(Double.parseDouble(s));
-                    data.delete(i, i + s.length());
-                } else {
-                    constants.add(-Double.parseDouble(s));
-                    if (i > 0) data.delete(i - 1, i + s.length());
-                    else data.delete(i, i + s.length());
-                }
-            }
-
-            if (i + s.length() + 1 < data.length()) {
-                if (data.charAt(i + s.length() + 1) == '-') i += s.length();
-                else i += s.length() + 1;
-            } else break;
-        }
-
-        double n = 0;
-        for (double d : constants) {
-            n += d;
-        }
-
-        if (n != 0) {
-            if (n < 0) data.append(n);
-            else data.append("+").append(n);
-        }
-
-        return data.toString();
     }
 
     private static boolean expIsSimplified(String data) {
@@ -410,10 +379,9 @@ public abstract class Equation {
 
         // Find first operand (Going to the left of the operator in the string)
         for (byte i = (byte) (index - 1); i >= 0; i--) {
-            if ((i != 0 && expression.charAt(i) == '-' && !Character.isDigit(expression.charAt(i - 1)) && !Character.isLetter(expression.charAt(i - 1))) || i == 0) {
+            if (i == 0 || (expression.charAt(i) == '-' && (Character.isDigit(expression.charAt(i - 1)) || Character.isLetter(expression.charAt(i - 1))))) {
                 operands[0] = expression.substring(i, index);
-                if (i == 0) operands[2] = i + "";
-                else operands[2] = i + 1 + "";
+                operands[2] = i + "";
                 break;
             } else if (expression.charAt(i) != '.' && !Character.isDigit(expression.charAt(i)) && !Character.isLetter(expression.charAt(i))) {
                 operands[0] = expression.substring(i + 1, index);
