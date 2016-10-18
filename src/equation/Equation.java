@@ -8,10 +8,7 @@ import java.util.ArrayList;
 public abstract class Equation {
 
     protected String solved = "";
-    private boolean valid;
-    protected File file;
-    private static File single = new File(System.getProperty("user.home") + "/Desktop/calculator/equation/Single.txt");
-    private static File linear = new File(System.getProperty("user.home") + "/Desktop/calculator/equation/Linear.txt");
+    protected static final File file = new File(System.getProperty("user.home") + "/Desktop/calculator/equation.txt");
 
     protected String removeSpaces(String s) {
         StringBuilder string = new StringBuilder(s);
@@ -22,10 +19,10 @@ public abstract class Equation {
     }
 
     protected boolean validEquation(String s) {
-        valid = false;
+        boolean valid = false;
         for (byte i = 0, num = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (Character.isLetterOrDigit(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '=' || c == 'c' || c == '(' || c == ')' || c == '.' || c == '|')
+            if (Character.isLetterOrDigit(c) || c == '+' || c == '-' || c == '*' || c == '/' || c == '%' || c == '=' || c == 'c' || c == '(' || c == ')' || c == '.')
                 num++;
             if (num == s.length() - 1) {
                 valid = true;
@@ -43,11 +40,13 @@ public abstract class Equation {
         return solved;
     }
 
-    //Single Variable
-    public static String simplifySideSV(String input) {
-        if (expIsSimplified(input)) return input;
-        StringBuilder data = new StringBuilder(correctOperators(input));
-        Utils.writeToFile(single, "Simplify in: " + data.toString(), true);
+    public static String simplifyExpression(String expression) {
+        if (expIsSimplified(correctSyntax(expression))) {
+            Utils.writeToFile(file, correctSyntax(expression) + " is already simplified.", true);
+            return expression;
+        }
+        StringBuilder data = new StringBuilder(correctSyntax(expression));
+        Utils.writeToFile(file, "Simplify in: " + data.toString(), true);
 
         // Find and solve parenthetical expressions
         if (data.toString().contains("(") || data.toString().contains(")")) {
@@ -61,10 +60,10 @@ public abstract class Equation {
                     else
                         o--; // If it doesn't contain an opening parenthesis, checking if it contains a closing one is redundant
                     if (o == 0) {
-                        byte one = Byte.parseByte(parentheses.get(0).substring(0, parentheses.get(0).indexOf("(")));
-                        byte two = Byte.parseByte(parentheses.get(i).substring(0, parentheses.get(i).indexOf(")")));
+                        byte one = Byte.parseByte(parentheses.get(0).substring(0, parentheses.get(0).indexOf("("))); // Index of the first parenthesis in the expression
+                        byte two = Byte.parseByte(parentheses.get(i).substring(0, parentheses.get(i).indexOf(")"))); // Index of the second parenthesis in the expression
 
-                        // If there is a number outside of a parenthetical expression, distribute that number into the expression
+                        // If there is a number outside of a parenthetical expression on the left, distribute that number into the expression
                         if (one > 0 && (Character.isDigit(data.charAt(one - 1)) || Character.isLetter(data.charAt(one - 1)))) {
                             for (byte b = (byte) (one - 1), n = 0; b >= 0; b--) {
                                 if (data.charAt(b) == '-') n++;
@@ -72,46 +71,55 @@ public abstract class Equation {
                                     if (b == 0) {
                                         // Solve any other parenthetical expressions before distributing
                                         if (data.substring(one + 1, two).contains("(")) {
-                                            data.replace(one + 1, two, simplifySideSV(data.substring(one + 1, two)));
-                                            data.replace(0, data.length(), correctOperators(data.toString()));
+                                            data.replace(one + 1, two, simplifyExpression(data.substring(one + 1, two)));
+                                            data.replace(0, data.length(), correctSyntax(data.toString()));
                                             break;
                                         }
 
-                                        data.replace(0, two + 1, distribute(data.substring(one + 1, two), data.substring(0, one), single));
-                                        data.replace(0, data.length(), correctOperators(data.toString()));
+                                        data.replace(0, two + 1, distribute(data.substring(one + 1, two), data.substring(0, one), file));
+                                        data.replace(0, data.length(), correctSyntax(data.toString()));
                                         break;
                                     } else if (!Character.isLetter(data.charAt(b)) && !Character.isDigit(data.charAt(b)) && data.charAt(b) != '.') {
                                         if (data.substring(one + 1, two).contains("(")) {
-                                            data.replace(one + 1, two, simplifySideSV(data.substring(one + 1, two)));
-                                            data.replace(0, data.length(), correctOperators(data.toString()));
+                                            data.replace(one + 1, two, simplifyExpression(data.substring(one + 1, two)));
+                                            data.replace(0, data.length(), correctSyntax(data.toString()));
                                             break;
                                         }
 
-                                        StringBuilder dist = new StringBuilder(distribute(data.substring(one + 1, two), data.substring(b, one), single));
+                                        StringBuilder dist = new StringBuilder(distribute(data.substring(one + 1, two), data.substring(b, one), file));
                                         if (!dist.toString().startsWith("-")) dist.insert(0, '+');
                                         data.replace(b, two + 1, dist.toString());
-                                        data.replace(0, data.length(), correctOperators(data.toString()));
+                                        data.replace(0, data.length(), correctSyntax(data.toString()));
                                         break;
                                     }
                                 }
                             }
-                            // If there is a negative symbol on the outside of a parenthetical expression, distribute it as -1
-                        } else if(one > 0 && (data.charAt(one - 1) == '-')) {
+                        } else if(two < data.length() - 1 && (Character.isLetter(data.charAt(two + 1)) || Character.isDigit(data.charAt(two + 1))) && !Utils.getNextNumber(data.substring(two + 1, data.length())).isEmpty()) { // If there is a number outside of a parenthetical expression on the right, distribute that number into the expression
+                            String num = Utils.getNextNumber(data.substring(two + 1, data.length()));
+                            data.replace(0, two + 1 /*Add one to two so it is outside the second parenthesis*/ + num.length(), distribute(data.substring(one + 1, two), num, file));
+                            data.replace(0, data.length(), correctSyntax(data.toString()));
+                            break;
+                        } else if(one > 0 && (data.charAt(one - 1) == '-')) { // If there is a negative symbol on the outside of a parenthetical expression, distribute it as -1
                             if (data.substring(one + 1, two).contains("(")) {
-                                data.replace(one + 1, two, simplifySideSV(data.substring(one + 1, two)));
-                                data.replace(0, data.length(), correctOperators(data.toString()));
+                                data.replace(one + 1, two, simplifyExpression(data.substring(one + 1, two)));
+                                data.replace(0, data.length(), correctSyntax(data.toString()));
                                 break;
                             }
 
-                            data.replace(one - 1, two + 1, distribute(data.substring(one + 1, two), "-1", single));
-                            data.replace(0, data.length(), correctOperators(data.toString()));
+                            data.replace(one - 1, two + 1, distribute(data.substring(one + 1, two), "-1", file));
+                            data.replace(0, data.length(), correctSyntax(data.toString()));
+                        } else if(two < data.length() - 1 && data.charAt(two + 1) == '/') { // If there is a division operation following the parenthetical expression, divide the expression by the number
+                            String num = simplifyExpression("1/" + Utils.getNextNumber(data.substring(two + 2, data.length())));
+                            data.replace(0, two + 2 /*Add two to two so it is to the right of the division symbol*/ + num.length(), distribute(data.substring(one + 1, two), num, file));
+                            data.replace(0, data.length(), correctSyntax(data.toString()));
+                            break;
                         } else {
-                            data.replace(one, two + 1, simplifySideSV(data.substring(one + 1, two)));
-                            data.replace(0, data.length(), correctOperators(data.toString()));
+                            data.replace(one, two + 1, simplifyExpression(data.substring(one + 1, two)));
+                            data.replace(0, data.length(), correctSyntax(data.toString()));
                         }
 
                         if (!expIsSimplified(data.toString()))
-                            data.replace(0, data.length(), simplifySideSV(data.toString()));
+                            data.replace(0, data.length(), simplifyExpression(data.toString()));
                         break;
                     }
                 }
@@ -121,20 +129,20 @@ public abstract class Equation {
         // Exponent
         if (opCanBeSimplified(data.toString(), '^')) {
             String[] operands = getOperands(data.toString(), '^');
-            Utils.writeToFile(single, "Exponent in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
+            Utils.writeToFile(file, "Exponent in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
             double power;
             String variable = "";
             if (Utils.containsLetters(operands[1])) {
-                variable = operands[1].substring(getVariableIndex(operands[1]), operands[1].length());
+                variable = "" + operands[1].charAt(operands[1].length() - 1);
                 power = getNumber(operands[1]);
             } else power = Double.parseDouble(operands[1]);
 
             if (!variable.equals("")) {
                 data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), Math.pow(Double.parseDouble(operands[0]), power) + variable);
-                Utils.writeToFile(single, "Exponent out: " + Math.pow(Double.parseDouble(operands[0]), power) + variable, true);
+                Utils.writeToFile(file, "Exponent out: " + Math.pow(Double.parseDouble(operands[0]), power) + variable, true);
             } else {
                 data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + Math.pow(Double.parseDouble(operands[0]), power));
-                Utils.writeToFile(single, "Exponent out: " + Math.pow(Double.parseDouble(operands[0]), power), true);
+                Utils.writeToFile(file, "Exponent out: " + Math.pow(Double.parseDouble(operands[0]), power), true);
             }
         }
 
@@ -144,50 +152,48 @@ public abstract class Equation {
         // Vice-versa for the else if statement
         if (opCanBeSimplified(data.toString(), '*') && (!data.toString().contains("/") || (data.toString().contains("/") && data.indexOf("*") < data.indexOf("/")))) {
             String[] operands = getOperands(data.toString(), '*');
-            Utils.writeToFile(single, "Multiplication in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
+            Utils.writeToFile(file, "Multiplication in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
             double[] numbers = new double[]{getNumber(operands[0]), getNumber(operands[1])};
+
             String variable = "";
 
             if (Utils.containsLetters(operands[0]))
-                variable = operands[0].substring(getVariableIndex(operands[0]), operands[0].length());
+                variable = "" + operands[0].charAt(operands[0].length() - 1);
             else if (Utils.containsLetters(operands[1]))
-                variable = operands[1].substring(getVariableIndex(operands[1]), operands[1].length());
+                variable = "" + operands[1].charAt(operands[1].length() - 1);
 
             // If both operands contain the variable
-            if (Utils.containsLetters(operands[0]) && Utils.containsLetters(operands[1]))
-                variable += "^" + 2; // Append the variable with 2 if both operands contain the variable
+            if (Utils.containsLetters(operands[0]) && Utils.containsLetters(operands[1])) {
+                char one = operands[0].charAt(operands[0].length() - 1);
+                char two = operands[1].charAt(operands[1].length() - 1);
+
+                if(one == two) variable += "^2";
+                else variable = one + "*" + two;
+            }
 
             // Replace the expression with its simplified form
-            if (!variable.equals("")) {
-                data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), (numbers[0] * numbers[1]) + variable);
-                Utils.writeToFile(single, "Multiplication out: " + (numbers[0] * numbers[1]) + variable, true);
-            } else {
-                data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (numbers[0] * numbers[1]));
-                Utils.writeToFile(single, "Multiplication out: " + (numbers[0] * numbers[1]), true);
-            }
+            data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), numbers[0] * numbers[1] + variable);
+            Utils.writeToFile(file, "Multiplication out: " + numbers[0] * numbers[1] + variable, true);
         } else if (opCanBeSimplified(data.toString(), '/') && (!data.toString().contains("*") || (data.toString().contains("*") && data.indexOf("/") < data.indexOf("*")))) {
             String[] operands = getOperands(data.toString(), '/');
-            Utils.writeToFile(single, "Division in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
+            Utils.writeToFile(file, "Division in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
             double[] numbers = new double[]{getNumber(operands[0]), getNumber(operands[1])};
             String variable = "";
 
-            if (Utils.containsLetters(operands[0]))
-                variable = operands[0].substring(getVariableIndex(operands[0]), operands[0].length());
-            else if (Utils.containsLetters(operands[1]))
-                variable = operands[1].substring(getVariableIndex(operands[1]), operands[1].length());
+            byte b = 0;
+            if(Utils.containsLetters(operands[0])) b++;
+            if(Utils.containsLetters(operands[1])) b++;
 
-            // If both operands contain the variable
-            if (Utils.containsLetters(operands[0]) && Utils.containsLetters(operands[1]))
-                variable = ""; // Delete the variable because x / x == 1, not a variable
+            if(b == 1) {
+                if (Utils.containsLetters(operands[0]))
+                    variable = "" + operands[0].charAt(operands[0].length() - 1);
+                else if (Utils.containsLetters(operands[1]))
+                    variable = "" + operands[1].charAt(operands[1].length() - 1);
+            }
 
             // Replace the expression with its simplified form
-            if (!variable.equals("")) {
-                data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), (numbers[0] / numbers[1]) + variable);
-                Utils.writeToFile(single, "Division out: " + (numbers[0] / numbers[1]) + variable, true);
-            } else {
-                data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (numbers[0] / numbers[1]));
-                Utils.writeToFile(single, "Division out: " + (numbers[0] / numbers[1]), true);
-            }
+            data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), (numbers[0] / numbers[1]) + variable);
+            Utils.writeToFile(file, "Division out: " + (numbers[0] / numbers[1]) + variable, true);
         }
 
         // If there is an addition sign before a subtraction sign OR there is an addition sign and no subtraction sign
@@ -195,55 +201,59 @@ public abstract class Equation {
         if (opCanBeSimplified(data.toString(), '+') && (!opCanBeSimplified(data.toString(), '-') || (opCanBeSimplified(data.toString(), '-') && data.indexOf("-") > data.indexOf("+")))) {
             String[] operands = getOperands(data.toString(), '+');
             if ((Utils.containsLetters(operands[0]) && Utils.containsLetters(operands[1])) || (!Utils.containsLetters(operands[0]) && !Utils.containsLetters(operands[1]))) {
-                Utils.writeToFile(single, "Addition in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
+                Utils.writeToFile(file, "Addition in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
                 double[] numbers = new double[]{getNumber(operands[0]), getNumber(operands[1])};
 
-                char variable = '0';
+                char variable = ' ';
                 if (Utils.containsLetters(operands[0]))
                     variable = operands[0].charAt(operands[0].length() - 1);
 
-                String outcome;
+                StringBuilder outcome = new StringBuilder("");
 
-                if(operands[0].startsWith("-") && Integer.parseInt(operands[2]) != 0 && (numbers[0] + numbers[1]) >= 0 && (Character.isLetter(data.charAt(Integer.parseInt(operands[2]) - 1)) || Character.isDigit(data.charAt(Integer.parseInt(operands[2]) - 1)))) {
-                    outcome = "+" + (numbers[0] + numbers[1]) + variable;
-                } else outcome = "" + (numbers[0] + numbers[1]) + variable;
-
-                if (variable != '0') {
-                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), outcome);
-                    Utils.writeToFile(single, "Addition out: " + outcome, true);
-                } else {
-                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), outcome);
-                    Utils.writeToFile(single, "Addition out: " + (numbers[0] + numbers[1]), true);
+                if(numbers[0] + numbers[1] != 0) {
+                    if (numbers[0] + numbers[1] >= 0) {
+                        if (variable != ' ') outcome.append(numbers[0] + numbers[1]).append(variable);
+                        else outcome.append(numbers[0] + numbers[1]);
+                        if (Integer.parseInt(operands[2]) != 0) outcome.insert(0, '+');
+                    } else {
+                        if (variable != ' ') outcome.append(numbers[0] + numbers[1]).append(variable);
+                        else outcome.append(numbers[0] + numbers[1]);
+                    }
                 }
+
+                data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), outcome.toString());
+                Utils.writeToFile(file, "Addition out: " + outcome.toString(), true);
             }
         } else if (opCanBeSimplified(data.toString(), '-') && (!opCanBeSimplified(data.toString(), '+') || (opCanBeSimplified(data.toString(), '+') && data.indexOf("+") > data.indexOf("-")))) {
             String[] operands = getOperands(data.toString(), '-');
             if ((Utils.containsLetters(operands[0]) && Utils.containsLetters(operands[1])) || (!Utils.containsLetters(operands[0]) && !Utils.containsLetters(operands[1]))) {
-                Utils.writeToFile(single, "Subtraction in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
+                Utils.writeToFile(file, "Subtraction in: " + data.substring(Integer.parseInt(operands[2]), Integer.parseInt(operands[3])), true);
                 double[] numbers = new double[]{getNumber(operands[0]), getNumber(operands[1])};
 
-                char variable = '0';
+                char variable = ' ';
                 if (Utils.containsLetters(operands[0]))
                     variable = operands[0].charAt(operands[0].length() - 1);
 
-                if (variable != '0') {
-                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (numbers[0] - numbers[1]) + variable);
-                    Utils.writeToFile(single, "Subtraction out: " + (numbers[0] - numbers[1]) + variable, true);
-                } else {
-                    data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), "" + (numbers[0] - numbers[1]));
-                    Utils.writeToFile(single, "Subtraction out: " + (numbers[0] - numbers[1]), true);
-                }
+
+                String outcome;
+                if(numbers[0] - numbers[1] == 0) outcome = "";
+                else if(variable != ' ') outcome = "" + (numbers[0] - numbers[1]) + variable;
+                else outcome = "" + (numbers[0] - numbers[1]);
+
+                if(numbers[0] - numbers[1] == 0) data.delete(Integer.parseInt(operands[0]), Integer.parseInt(operands[1]));
+                else data.replace(Integer.parseInt(operands[2]), Integer.parseInt(operands[3]), outcome);
+                Utils.writeToFile(file, "Subtraction out: " + outcome, true);
             }
         }
 
-        if (!expIsSimplified(data.toString())) data.replace(0, data.length(), simplifySideSV(data.toString()));
+        if (!expIsSimplified(data.toString())) data.replace(0, data.length(), simplifyExpression(data.toString()));
 
-        Utils.writeToFile(single, "Simplify out: " + data.toString(), true);
-        return correctOperators(data.toString());
+        Utils.writeToFile(file, "Simplify out: " + data.toString(), true);
+        return correctSyntax(data.toString());
     }
 
     private static String distribute(String expression, String distribute, File file) {
-        StringBuilder data = new StringBuilder(expression.substring(0, expression.indexOf("(") + 1) + simplifySideSV(expression.substring(expression.indexOf("(") + 1, expression.length())));
+        StringBuilder data = new StringBuilder(expression.substring(0, expression.indexOf("(") + 1) + simplifyExpression(expression.substring(expression.indexOf("(") + 1, expression.length())));
         Utils.writeToFile(file, "Distribute in: " + data.toString(), true);
 
         ArrayList<String> numbers = new ArrayList<>(); // Numbers/variables to distribute to
@@ -266,7 +276,7 @@ public abstract class Equation {
 
         // Multiply the numbers by the distributing number
         for(byte i = 0; i < numbers.size(); i++) {
-            expressions.add(simplifySideSV(distribute + "*" + numbers.get(i)));
+            expressions.add(simplifyExpression(distribute + "*" + numbers.get(i)));
         }
 
         // Add the expressions and the operators to the end of data, then return it
@@ -276,8 +286,94 @@ public abstract class Equation {
                 data.append(expressions.get(i)).append(operators.get(i));
             }
 
-        Utils.writeToFile(file, "Distribute out: " + correctOperators(data.toString()), true);
-        return correctOperators(data.toString());
+        Utils.writeToFile(file, "Distribute out: " + correctSyntax(data.toString()), true);
+        return correctSyntax(data.toString());
+    }
+
+    protected static String[] addVariables(String left, String right, char variable) {
+        StringBuilder l = new StringBuilder(left);
+        StringBuilder r = new StringBuilder(right);
+
+        ArrayList<String> variables = new ArrayList<>();
+
+        for (byte i = 0; i < r.length(); ) {
+            String s = Utils.getNextNumber(r.substring(i, r.toString().length()));
+            // If the number has the variable in it and is in an addition or subtraction operation OR is alone
+            if (s.contains(variable + "") && (i == 0 || (i > 0 && ((r.charAt(i - 1) == '-' || s.startsWith("-")) || r.charAt(i - 1) == '+'))) && (i + s.length() >= r.length() || (i + s.length() < r.length() && (r.charAt(i + s.length()) == '-' || r.charAt(i + s.length()) == '+')))) {
+                if (s.startsWith("-")) {
+                    variables.add(s.substring(1, s.length()));
+                    r.delete(i, i + s.length());
+                } else {
+                    variables.add("-" + s);
+                    if (i > 0) r.delete(i - 1, i + s.length());
+                    else r.delete(i, i + s.length());
+                }
+            } else {
+                if (i + s.length() + 1 < r.length()) {
+                    if (r.charAt(i + s.length()) == '-') i += s.length();
+                    else i += s.length() + 1;
+                } else break;
+            }
+        }
+
+        for (String s : variables) {
+            if(s.startsWith("-")) l.append(s);
+            else l.append("+").append(s);
+        }
+
+        if(l.toString().startsWith("+")) l.deleteCharAt(0);
+        if(r.toString().startsWith("+")) r.deleteCharAt(0);
+
+        return new String[]{l.toString(), r.toString()};
+    }
+
+    protected static String[] addConstants(String left, String right, char variable) {
+        StringBuilder l = new StringBuilder(left);
+        StringBuilder r = new StringBuilder(right);
+
+        ArrayList<String> constants = new ArrayList<>();
+
+        for (byte i = 0; i < l.length(); ) {
+            String s = Utils.getNextNumber(l.substring(i, l.toString().length()));
+            // If the number doesn't have the variable in it and is in an addition or subtraction operation OR is alone
+            if (!s.contains(variable + "") && (i == 0 || (i > 0 && ((l.charAt(i - 1) == '-' || s.startsWith("-")) || l.charAt(i - 1) == '+'))) && (i + s.length() >= l.length() || (i + s.length() < l.length() && (l.charAt(i + s.length()) == '-' || l.charAt(i + s.length()) == '+')))) {
+                if (s.startsWith("-")) {
+                    constants.add(s.substring(1, s.length()));
+                    l.delete(i, i + s.length());
+                } else {
+                    constants.add("-" + s);
+                    if (i > 0) l.delete(i - 1, i + s.length());
+                    else l.delete(i, i + s.length());
+                }
+            } else {
+                if (i + s.length() + 1 < l.length()) {
+                    if (l.charAt(i + s.length()) == '-') i += s.length();
+                    else i += s.length() + 1;
+                } else break;
+            }
+        }
+
+        double d = 0;
+        for (String s : constants) {
+            if(!Utils.containsLetters(s)) d += Double.parseDouble(s);
+        }
+
+        if(d != 0) {
+            if (d > 0) r.append("+").append(d);
+            else r.append(d);
+        }
+
+        for (String s : constants) {
+            if (Utils.containsLetters(s)) {
+                if (s.startsWith("-")) r.append(s);
+                else r.append("+").append(s);
+            }
+        }
+
+        if(l.toString().startsWith("+")) l.deleteCharAt(0);
+        if(r.toString().startsWith("+")) r.deleteCharAt(0);
+
+        return new String[]{l.toString(), r.toString()};
     }
 
     private static boolean expIsSimplified(String data) {
@@ -296,17 +392,32 @@ public abstract class Equation {
         if (expression.contains(operator + "")) {
             String[] operands = getOperands(expression, operator);
             if (operands[0] != null && operands[1] != null && operands[2] != null && operands[3] != null) {
-                if ((operator == '+' || operator == '-') && ((Utils.containsLetters(operands[0]) && !Utils.containsLetters(operands[1])) || (Utils.containsLetters(operands[1]) && !Utils.containsLetters(operands[0]))))
-                    return false;
+                if (operands[0].isEmpty() || operands[1].isEmpty()) return false;
+
+                if((operator == '+' || operator == '-') && !Utils.containsLetters(operands[0]) && !Utils.containsLetters(operands[1])) return true;
+
                 if (operator == '^' && (Utils.containsLetters(operands[0]) || Utils.containsLetters(operands[1])))
                     return false;
-                if (!operands[0].isEmpty() && !operands[1].isEmpty()) return true;
+
+                if(Utils.containsLetters(operands[0]) && Utils.containsLetters(operands[1])) {
+                    char one = operands[0].charAt(operands[0].length() - 1);
+                    char two = operands[1].charAt(operands[1].length() - 1);
+                    if (operator == '*' || operator == '/') {
+                        if (one == two) return true;
+                        else if(getNumber(operands[1]) != 1) return true;
+                        else if(getNumber(operands[1]) == 1) return false;
+                        return false;
+                    } else return one == two;
+                }
+
+                if(operator == '+' || operator == '-') return false;
+                return true;
             }
         }
         return false;
     }
 
-    private static String correctOperators(String expression) {
+    private static String correctSyntax(String expression) {
         StringBuilder data = new StringBuilder(expression);
 
         while (data.toString().contains("--")) {
@@ -317,10 +428,16 @@ public abstract class Equation {
             data.replace(data.indexOf("+-"), data.indexOf("+-") + 2, "-");
         }
 
+        for(byte i = 0; i < data.length(); i++) {
+            if(i < data.length() - 1 && Character.isLetter(data.charAt(i)) && (Character.isLetter(data.charAt(i + 1)) || Character.isDigit(data.charAt(i + 1)))) {
+                data.insert(i + 1, '*');
+            }
+        }
+
         return data.toString();
     }
 
-    private static Double getNumber(String exp) {
+    public static Double getNumber(String exp) {
         if (!exp.isEmpty()) {
             if (Utils.containsLetters(exp)) {
                 if (exp.length() == 1) return 1.0;
@@ -330,13 +447,6 @@ public abstract class Equation {
             } else return Double.parseDouble(exp);
         }
         return 0.0;
-    }
-
-    private static int getVariableIndex(String number) {
-        for (byte i = 0; i < number.length(); i++) {
-            if (Character.isLetter(number.charAt(i))) return i;
-        }
-        return -1;
     }
 
     private static ArrayList<String> getParentheses(String expression) {

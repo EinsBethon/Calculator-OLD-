@@ -246,12 +246,12 @@ public class Algebraic {
 
         bar = new MenuBar();
         bar.setMinWidth(window.getWidth());
-        view = new Menu("View");
-        help = new Menu("Help");
-        shortcuts = new MenuItem("Shortcuts");
-        equation = new MenuItem("Equation");
-        standard = new MenuItem("Standard");
-        formulas = new MenuItem("Formulas");
+        view = new Menu("Vie_w");
+        help = new Menu("H_elp");
+        shortcuts = new MenuItem("_Shortcuts");
+        equation = new MenuItem("_Equation");
+        standard = new MenuItem("_Standard");
+        formulas = new MenuItem("_Formulas");
 
         help.getItems().addAll(shortcuts, formulas);
         view.getItems().addAll(standard, equation);

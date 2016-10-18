@@ -40,9 +40,9 @@ public class EqCalc {
         window.setHeight(300);
         window.setResizable(false);
 
-        standard = new MenuItem("Standard");
-        algebraic = new MenuItem("Algebraic");
-        view = new Menu("View");
+        standard = new MenuItem("_Standard");
+        algebraic = new MenuItem("_Algebraic");
+        view = new Menu("Vie_w");
         view.getItems().addAll(standard, algebraic);
         bar = new MenuBar();
         bar.setMinWidth(window.getWidth());
@@ -78,34 +78,18 @@ public class EqCalc {
         });
 
         solve.setOnAction(e -> {
-            if (!first.getText().isEmpty() && second.getText().isEmpty()) {
-                if (Utils.variableCount(first.getText()) == 1) {
-                    Equation one = new SingleVariable(first.getText(), new File(System.getProperty("user.home") + "/Desktop/calculator/equation/Single.txt"));
-                    answer.setText(one.getSolved());
-                } else if (Utils.variableCount(first.getText()) == 2) {
-                    Equation one = new Linear(first.getText(), new File(System.getProperty("user.home") + "/Desktop/calculator/equation/Linear.txt"));
-                    answer.setText(one.getSolved());
-                } else if (Utils.variableCount(first.getText()) == 0)
-                    Utils.popUp("Error!", "You have entered an algebraic expression.\nPlease use the algebraic calculator for this.");
-                else Utils.popUp("Error!", "This calculator does not support\nthree-variable equations yet.");
-            } else if (first.getText().isEmpty() && !second.getText().isEmpty()) {
-                if (Utils.variableCount(second.getText()) == 1) {
-                    Equation one = new SingleVariable(second.getText(), new File(System.getProperty("user.home") + "/Desktop/calculator/equation/Single.txt"));
-                    answer.setText(one.getSolved());
-                } else if (Utils.variableCount(second.getText()) == 2) {
-                    Equation one = new Linear(second.getText(), new File(System.getProperty("user.home") + "/Desktop/calculator/equation/Linear.txt"));
-                    answer.setText(one.getSolved());
-                } else if (Utils.variableCount(second.getText()) == 0)
-                    Utils.popUp("Error!", "You have entered an algebraic expression.\nPlease use the algebraic calculator for this.");
-                else Utils.popUp("Error!", "This calculator does not support\nthree-variable equations yet.");
-            } else if (!first.getText().isEmpty() && !second.getText().isEmpty()) {
-                if (Utils.variableCount(first.getText() + " " + second.getText()) == 2) {
-                    EquationSystem sys = new EquationSystem(first.getText(), second.getText());
-                    answer.setText(sys.getSolved());
-                } else if (Utils.variableCount(first.getText() + " " + second.getText()) == 0)
-                    Utils.popUp("Error!", "You have entered an algebraic expression.\nPlease use the algebraic calculator for this.");
-                else Utils.popUp("Error!", "This calculator does not support\nthree-variable equations yet.");
-            }
+            boolean fEmpty = first.getText().isEmpty(), sEmpty = second.getText().isEmpty();
+            byte fVarNum = Utils.variableCount(first.getText()), sVarNum = Utils.variableCount(second.getText());
+            String fText = first.getText(), sText = second.getText();
+
+            Equation equation;
+
+            if(!fEmpty && sEmpty && fVarNum == 1) equation = new SingleVariable(fText);
+            else if(fEmpty && !sEmpty && sVarNum == 1) equation = new SingleVariable(sText);
+            else if(!fEmpty && !sEmpty && fVarNum <= 2 && sVarNum <= 2) equation = new SystemOfEquations(fText, sText);
+            else equation = null;
+
+            if(equation != null) answer.setText(equation.getSolved());
         });
 
         answer = new TextArea();

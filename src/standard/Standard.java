@@ -120,11 +120,11 @@ public class Standard {
 
         bar = new MenuBar();
         bar.setMinWidth(window.getWidth());
-        view = new Menu("View");
-        help = new Menu("Help");
-        shortcuts = new MenuItem("Shortcuts");
-        equation = new MenuItem("Equation");
-        algebraic = new MenuItem("Algebraic");
+        view = new Menu("Vie_w");
+        help = new Menu("H_elp");
+        shortcuts = new MenuItem("_Shortcuts");
+        equation = new MenuItem("_Equation");
+        algebraic = new MenuItem("_Algebraic");
 
         shortcuts.setOnAction(e -> Utils.popUp("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
 
