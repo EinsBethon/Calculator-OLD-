@@ -25,7 +25,7 @@ Sign	22
 
 ALGEBRAIC
 pow10	23
-3sqrt	24
+cbrt	24
 n!		25
 log		26
 )		27
