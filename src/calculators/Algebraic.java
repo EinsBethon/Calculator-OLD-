@@ -182,7 +182,7 @@ public class Algebraic {
 
         MenuBar bar;
         Menu view, help;
-        MenuItem equation, standard, shortcuts, formulas, inequality;
+        MenuItem equation, standard, shortcuts, formulas, inequality, graphing;
 
         Font buttonsFont, tArea;
 
@@ -212,15 +212,17 @@ public class Algebraic {
         equation = new MenuItem("_Equation");
         standard = new MenuItem("_Standard");
         inequality = new MenuItem("Ine_quality");
+        graphing = new MenuItem("_Graphing");
         formulas = new MenuItem("_Formulas");
 
         standard.setAccelerator(KeyCombination.keyCombination("ALT+S"));
         inequality.setAccelerator(KeyCombination.keyCombination("ALT+Q"));
         equation.setAccelerator(KeyCombination.keyCombination("ALT+E"));
         shortcuts.setAccelerator(KeyCombination.keyCombination("ALT+C"));
+        graphing.setAccelerator(KeyCombination.keyCombination("ALT+G"));
 
         help.getItems().addAll(shortcuts, formulas);
-        view.getItems().addAll(standard, equation, inequality);
+        view.getItems().addAll(standard, equation, inequality, graphing);
         bar.getMenus().addAll(view, help);
 
         // Zero
@@ -658,7 +660,7 @@ public class Algebraic {
         });
 
         equation.setOnAction(e -> {
-            new Equation();
+            new Eq();
             window.close();
         });
 
@@ -668,7 +670,12 @@ public class Algebraic {
         });
 
         inequality.setOnAction(e -> {
-            new Inequality();
+            new Ineq();
+            window.close();
+        });
+
+        graphing.setOnAction(e -> {
+            new Graphing();
             window.close();
         });
 

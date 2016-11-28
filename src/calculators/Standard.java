@@ -110,7 +110,7 @@ public class Standard {
         // Menu
         MenuBar bar;
         Menu view, help;
-        MenuItem equation, inequality, algebraic, shortcuts;
+        MenuItem equation, inequality, algebraic, shortcuts, graphing;
 
         bar = new MenuBar();
         bar.setMinWidth(window.getWidth());
@@ -120,16 +120,18 @@ public class Standard {
         equation = new MenuItem("_Equation");
         inequality = new MenuItem("Ine_quality");
         algebraic = new MenuItem("_Algebraic");
+        graphing = new MenuItem("_Graphing");
 
         algebraic.setAccelerator(KeyCombination.keyCombination("ALT+A"));
         inequality.setAccelerator(KeyCombination.keyCombination("ALT+Q"));
         equation.setAccelerator(KeyCombination.keyCombination("ALT+E"));
         shortcuts.setAccelerator(KeyCombination.keyCombination("ALT+C"));
+        graphing.setAccelerator(KeyCombination.keyCombination("ALT+G"));
 
         shortcuts.setOnAction(e -> Utils.popUp("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
 
         equation.setOnAction(e -> {
-            new Equation();
+            new Eq();
             window.close();
         });
 
@@ -139,12 +141,17 @@ public class Standard {
         });
 
         inequality.setOnAction(e -> {
-            new Inequality();
+            new Ineq();
+            window.close();
+        });
+
+        graphing.setOnAction(e -> {
+            new Graphing();
             window.close();
         });
 
         help.getItems().add(shortcuts);
-        view.getItems().addAll(algebraic, equation, inequality);
+        view.getItems().addAll(algebraic, equation, inequality, graphing);
         bar.getMenus().addAll(view, help);
 
         // Digits
