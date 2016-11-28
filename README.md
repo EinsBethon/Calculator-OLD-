@@ -1,11 +1,6 @@
 # Multi-function-Calculator
 8/12/16
-A calculator made in JavaFX with, many functions.
--Standard
--Algebraic
--Equation and systems of equations
--Inequality and systems of inequalities
--Graphing
+A calculator made in JavaFX with, many functions. Standard, algebraic, equation and systems of equations, Inequality and systems of inequalities, and graphing.
 
 IN ORDER FOR CALCULATOR TO WORK, YOU NEED MY ALGEBRAIC LIBRARY FOUND HERE: https://dl.dropboxusercontent.com/u/270687824/Alib.jar
 
