@@ -1,4 +1,4 @@
-# Multi-function-Calculator
+# Calculator
 8/12/16
 A calculator made in JavaFX with various functions including an algebraic mode and equation and inequality solving.
 
