@@ -51,82 +51,82 @@ public class Algebraic {
     private String replaceFunctions(String expression) {
         StringBuilder s = new StringBuilder(expression);
 
-        if(s.toString().contains("sqrt(")) {
+        if (s.toString().contains("sqrt(")) {
             String exp = getExpression(s.substring(s.indexOf("sqrt"), s.length()), "sqrt");
             double d = Math.sqrt(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("sqrt("), s.indexOf("sqrt(") + 5 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("sqrt("), s.indexOf("sqrt(") + 5 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("cbrt(")) {
+        if (s.toString().contains("cbrt(")) {
             String exp = getExpression(s.substring(s.indexOf("cbrt"), s.length()), "cbrt");
             double d = Math.cbrt(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("cbrt("), s.indexOf("cbrt(") + 5 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("cbrt("), s.indexOf("cbrt(") + 5 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("ln(")) {
+        if (s.toString().contains("ln(")) {
             String exp = getExpression(s.substring(s.indexOf("ln"), s.length()), "ln");
             double d = Math.log(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("ln("), s.indexOf("ln(") + 3 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("ln("), s.indexOf("ln(") + 3 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("log(")) {
+        if (s.toString().contains("log(")) {
             String exp = getExpression(s.substring(s.indexOf("log"), s.length()), "log");
             double d = Math.log10(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("log("), s.indexOf("log(") + 4 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("log("), s.indexOf("log(") + 4 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("sin-1(")) {
+        if (s.toString().contains("sin-1(")) {
             String exp = getExpression(s.substring(s.indexOf("sin-1"), s.length()), "sin-1");
             double d = Math.asin(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("sin-1("), s.indexOf("sin-1(") + 6 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("sin-1("), s.indexOf("sin-1(") + 6 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("tan-1(")) {
+        if (s.toString().contains("tan-1(")) {
             String exp = getExpression(s.substring(s.indexOf("tan-1"), s.length()), "tan-1");
             double d = Math.atan(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("tan-1("), s.indexOf("tan-1(") + 6 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("tan-1("), s.indexOf("tan-1(") + 6 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("cos-1(")) {
+        if (s.toString().contains("cos-1(")) {
             String exp = getExpression(s.substring(s.indexOf("cos-1"), s.length()), "cos-1");
             double d = Math.acos(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("cos-1("), s.indexOf("cos-1(") + 6 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("cos-1("), s.indexOf("cos-1(") + 6 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("sinh(")) {
+        if (s.toString().contains("sinh(")) {
             String exp = getExpression(s.substring(s.indexOf("sinh"), s.length()), "sinh");
             double d = Math.sinh(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("sinh"), s.indexOf("sinh(") + 5 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("sinh"), s.indexOf("sinh(") + 5 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("tanh(")) {
+        if (s.toString().contains("tanh(")) {
             String exp = getExpression(s.substring(s.indexOf("tanh"), s.length()), "tanh");
             double d = Math.tanh(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("tanh"), s.indexOf("tanh(") + 5 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("tanh"), s.indexOf("tanh(") + 5 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("cosh(")) {
+        if (s.toString().contains("cosh(")) {
             String exp = getExpression(s.substring(s.indexOf("cosh"), s.length()), "cosh");
             double d = Math.cosh(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("cosh"), s.indexOf("cosh(") + 5 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("cosh"), s.indexOf("cosh(") + 5 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("sin(")) {
+        if (s.toString().contains("sin(")) {
             String exp = getExpression(s.substring(s.indexOf("sin"), s.length()), "sin");
             double d = Math.sin(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("sin("), s.indexOf("sin(") + 4 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("sin("), s.indexOf("sin(") + 4 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("tan(")) {
+        if (s.toString().contains("tan(")) {
             String exp = getExpression(s.substring(s.indexOf("tan"), s.length()), "tan");
             double d = Math.tan(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("tan("), s.indexOf("tan(") + 4 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("tan("), s.indexOf("tan(") + 4 + exp.length() + 1, d + "");
         }
 
-        if(s.toString().contains("cos(")) {
+        if (s.toString().contains("cos(")) {
             String exp = getExpression(s.substring(s.indexOf("cos"), s.length()), "cos");
             double d = Math.cos(Double.parseDouble(new Expression(exp, file).solved()));
-            if(d >= 0) s.replace(s.indexOf("cos("), s.indexOf("cos(") + 4 + exp.length() + 1, d + "");
+            if (d >= 0) s.replace(s.indexOf("cos("), s.indexOf("cos(") + 4 + exp.length() + 1, d + "");
         }
 
         return s.toString();
@@ -137,11 +137,11 @@ public class Algebraic {
 
         String s = "";
 
-        if(!parentheses.contains("error")) {
-            for(int i = 1, o = 1; i < parentheses.size(); i++) {
-                if(parentheses.get(i).contains("(")) o++;
+        if (!parentheses.contains("error")) {
+            for (int i = 1, o = 1; i < parentheses.size(); i++) {
+                if (parentheses.get(i).contains("(")) o++;
                 else o--;
-                if(o == 0) {
+                if (o == 0) {
                     s = exp.substring(exp.indexOf(function) + function.length() + 1, Integer.parseInt(parentheses.get(i).substring(0, parentheses.get(i).length() - 1)));
                     break;
                 }
@@ -180,12 +180,7 @@ public class Algebraic {
         Scene main;
         Pane layout;
 
-        MenuBar bar;
-        Menu view, help;
-        MenuItem equation, standard, shortcuts, formulas, inequality;
-
-        Font buttonsFont, tArea;
-
+        // Window
         window = new Stage();
         layout = new Pane();
         main = new Scene(layout);
@@ -193,34 +188,61 @@ public class Algebraic {
         window.setWidth(410);
         window.setHeight(325);
 
+        // Var init
+        Font buttonsFont = new Font("Consolas", 18);
+        Font tArea = new Font("Consolas", 18);
         buttons = new ArrayList<>();
-
         one = new StringBuilder("0");
         two = new StringBuilder("");
-
         displayAnswer = false;
         nav = false;
 
-        buttonsFont = new Font("Consolas", 18);
-        tArea = new Font("Consolas", 18);
-
-        bar = new MenuBar();
+        // Menu
+        MenuBar bar = new MenuBar();
         bar.setMinWidth(window.getWidth());
-        view = new Menu("Vie_w");
-        help = new Menu("H_elp");
-        shortcuts = new MenuItem("_Shortcuts");
-        equation = new MenuItem("_Equation");
-        standard = new MenuItem("_Standard");
-        inequality = new MenuItem("Ine_quality");
-        formulas = new MenuItem("_Formulas");
+
+        Menu view = new Menu("Vie_w");
+        Menu help = new Menu("H_elp");
+
+        MenuItem shortcuts = new MenuItem("_Shortcuts");
+        MenuItem equation = new MenuItem("_Equation");
+        MenuItem standard = new MenuItem("_Standard");
+        MenuItem inequality = new MenuItem("Ine_quality");
+        MenuItem graphing = new MenuItem("_Graphing");
+        MenuItem formulas = new MenuItem("_Formulas");
+
+        equation.setOnAction(e -> {
+            new Eq();
+            window.close();
+        });
+
+        standard.setOnAction(e -> {
+            new Standard();
+            window.close();
+        });
+
+        inequality.setOnAction(e -> {
+            new Ineq();
+            window.close();
+        });
+
+        graphing.setOnAction(e -> {
+            new Graphing();
+            window.close();
+        });
+
+        shortcuts.setOnAction(e -> popUp("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
+        formulas.setOnAction(e -> popUp("Formulas", "Area of a rectangle: w * h\nPerimeter of a rectangle: 2w + 2l\nArea of a circle: \u03C0r^2\nCircumference of a circle: 2\u03C0r\nSine: Opposite/Hypotenuse\nCosine: Adjacent/Hypotenuse\nTangent: Opposite/Adjacent", 130, 225));
 
         standard.setAccelerator(KeyCombination.keyCombination("ALT+S"));
         inequality.setAccelerator(KeyCombination.keyCombination("ALT+Q"));
         equation.setAccelerator(KeyCombination.keyCombination("ALT+E"));
         shortcuts.setAccelerator(KeyCombination.keyCombination("ALT+C"));
+        graphing.setAccelerator(KeyCombination.keyCombination("ALT+G"));
+        formulas.setAccelerator(KeyCombination.keyCombination("ALT+F"));
 
         help.getItems().addAll(shortcuts, formulas);
-        view.getItems().addAll(standard, equation, inequality);
+        view.getItems().addAll(standard, equation, inequality, graphing);
         bar.getMenus().addAll(view, help);
 
         // Zero
@@ -284,6 +306,7 @@ public class Algebraic {
                     one.append(c1);
                     two.append(one.toString());
                 }
+
                 one.replace(0, one.length(), "0");
                 setText();
             });
@@ -299,10 +322,12 @@ public class Algebraic {
             if (!one.toString().equals("0") && !displayAnswer) {
                 two.append(one.toString());
             }
+
             one.replace(0, one.length(), "0");
             setText();
             one.replace(0, one.length(), new Expression(replaceFunctions(two.toString()), file).solved());
             setText();
+            displayAnswer = true;
         });
 
         // Modulus
@@ -639,12 +664,21 @@ public class Algebraic {
             }
         });
 
+        result = new TextArea();
+        result.setFont(tArea);
+        result.setLayoutY(25);
+        result.setMinWidth(window.getWidth());
+        result.setMaxHeight(60);
+        result.setEditable(false);
+        result.setFocusTraversable(false);
+
         // Key inputs
         layout.setOnKeyPressed(new EventHandler<KeyEvent>() {
             public void handle(KeyEvent k) {
                 for (int i = 0; i < 10; i++) {
                     if (k.getText().equals(i + "")) buttons.get(i).fire();
                 }
+
                 for (int i = 0; i < 5; i++) {
                     if (k.getText().equals(buttons.get(i + 10).getText())) buttons.get(i + 10).fire();
                 }
@@ -657,38 +691,11 @@ public class Algebraic {
             }
         });
 
-        equation.setOnAction(e -> {
-            new Equation();
-            window.close();
-        });
-
-        standard.setOnAction(e -> {
-            new Standard();
-            window.close();
-        });
-
-        inequality.setOnAction(e -> {
-            new Inequality();
-            window.close();
-        });
-
-        shortcuts.setOnAction(e -> popUp("Shortcuts", "Modulus: M\nClear: Delete\nSign: S\nSquare Root: Q\nReciprocal: R"));
-
-        formulas.setOnAction(e -> popUp("Formulas", "Area of a rectangle: w * h\nPerimeter of a rectangle: 2w + 2l\nArea of a circle: \u03C0r^2\nCircumference of a circle: 2\u03C0r\nSine: Opposite/Hypotenuse\nCosine: Adjacent/Hypotenuse\nTangent: Opposite/Adjacent", 130, 225));
-
-        result = new TextArea();
-        result.setFont(tArea);
-        result.setLayoutY(25);
-        result.setMinWidth(window.getWidth());
-        result.setMaxHeight(60);
-        result.setEditable(false);
-        result.setFocusTraversable(false);
-
         setText();
 
         layout.getChildren().addAll(result, bar);
 
-        for (Button b: buttons) {
+        for (Button b : buttons) {
             layout.getChildren().add(b);
         }
 
