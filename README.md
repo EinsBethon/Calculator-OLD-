@@ -11,3 +11,4 @@ A calculator history can be recorded by creating the following files
 Create a folder named "calculator" on your desktop.
 In calculator, create three files: equation.txt, algebraic.txt, and inequality.txt.
 
+(Better re-written version coming down the pipeline)
